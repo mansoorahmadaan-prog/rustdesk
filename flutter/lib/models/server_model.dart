@@ -114,6 +114,39 @@ class ServerModel with ChangeNotifier {
     */
   }
 
+  /// Initialize auto-accept connections on app startup
+  initAutoAcceptConnections() async {
+    if (isMobile && isAndroid) {
+      try {
+        final autoAccept = await bind.mainGetOption(
+            key: kOptionAutoAcceptConnections);
+        if (autoAccept == 'Y') {
+          // Auto-accept connections without confirmation, use empty approve mode
+          await setApproveMode('');
+          debugPrint("Auto-accept connections enabled");
+        }
+      } catch (e) {
+        debugPrint("Error initializing auto-accept connections: $e");
+      }
+    }
+  }
+
+  /// Initialize auto-start service on app startup (Android only)
+  initAutoStartService() async {
+    if (isMobile && isAndroid) {
+      try {
+        final autoStart = await bind.mainGetOption(
+            key: kOptionAutoStartService);
+        if (autoStart == 'Y') {
+          await startService();
+          debugPrint("Auto-start service enabled");
+        }
+      } catch (e) {
+        debugPrint("Error initializing auto-start service: $e");
+      }
+    }
+  }
+
   bool get allowNumericOneTimePassword => _allowNumericOneTimePassword;
   switchAllowNumericOneTimePassword() async {
     await mainSetBoolOption(

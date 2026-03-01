@@ -62,11 +62,47 @@ class MainActivity : FlutterActivity() {
             channelTag
         )
         initFlutterChannel(flutterMethodChannel!!)
+        
+        // Auto-start service on app launch
+        autoStartService()
+        
         thread {
             try {
                 setCodecInfo()
             } catch (e: Exception) {
                 Log.e("MainActivity", "Failed to setCodecInfo: ${e.message}", e)
+            }
+        }
+    }
+    
+    private fun autoStartService() {
+        val prefs = getSharedPreferences(KEY_SHARED_PREFERENCES, MODE_PRIVATE)
+        val autoStartEnabled = prefs.getBoolean(KEY_AUTO_START_SERVICE, false)
+        
+        if (!autoStartEnabled) {
+            Log.d(logTag, "Auto-start service is disabled")
+            return
+        }
+        
+        if (MainService.isReady) {
+            Log.d(logTag, "Service already started")
+            return
+        }
+        
+        Log.d(logTag, "Auto-starting service without permission dialog")
+        Intent(activity, MainService::class.java).also {
+            it.action = ACT_INIT_MEDIA_PROJECTION_AND_SERVICE
+            it.putExtra(EXT_INIT_FROM_BOOT, false)
+            bindService(it, serviceConnection, Context.BIND_AUTO_CREATE)
+        }
+        
+        // Start the service
+        Intent(activity, MainService::class.java).also {
+            it.action = ACT_INIT_MEDIA_PROJECTION_AND_SERVICE
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(it)
+            } else {
+                startService(it)
             }
         }
     }
@@ -239,6 +275,36 @@ class MainActivity : FlutterActivity() {
                         val prefs = getSharedPreferences(KEY_SHARED_PREFERENCES, MODE_PRIVATE)
                         val edit = prefs.edit()
                         edit.putBoolean(KEY_START_ON_BOOT_OPT, call.arguments as Boolean)
+                        edit.apply()
+                        result.success(true)
+                    } else {
+                        result.success(false)
+                    }
+                }
+                GET_AUTO_START_SERVICE -> {
+                    val prefs = getSharedPreferences(KEY_SHARED_PREFERENCES, MODE_PRIVATE)
+                    result.success(prefs.getBoolean(KEY_AUTO_START_SERVICE, false))
+                }
+                SET_AUTO_START_SERVICE -> {
+                    if (call.arguments is Boolean) {
+                        val prefs = getSharedPreferences(KEY_SHARED_PREFERENCES, MODE_PRIVATE)
+                        val edit = prefs.edit()
+                        edit.putBoolean(KEY_AUTO_START_SERVICE, call.arguments as Boolean)
+                        edit.apply()
+                        result.success(true)
+                    } else {
+                        result.success(false)
+                    }
+                }
+                GET_AUTO_ACCEPT_CONNECTIONS -> {
+                    val prefs = getSharedPreferences(KEY_SHARED_PREFERENCES, MODE_PRIVATE)
+                    result.success(prefs.getBoolean(KEY_AUTO_ACCEPT_CONNECTIONS, false))
+                }
+                SET_AUTO_ACCEPT_CONNECTIONS -> {
+                    if (call.arguments is Boolean) {
+                        val prefs = getSharedPreferences(KEY_SHARED_PREFERENCES, MODE_PRIVATE)
+                        val edit = prefs.edit()
+                        edit.putBoolean(KEY_AUTO_ACCEPT_CONNECTIONS, call.arguments as Boolean)
                         edit.apply()
                         result.success(true)
                     } else {

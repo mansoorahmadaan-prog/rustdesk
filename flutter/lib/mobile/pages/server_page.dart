@@ -86,6 +86,13 @@ class _DropDownAction extends StatelessWidget {
                   approveMode != 'password' && approveMode != 'click'),
               enabled: !isApproveModeFixed,
             ),
+            const PopupMenuDivider(),
+            PopupMenuItem(
+              value: 'AutoAcceptConnections',
+              child: listTile('Auto-accept connections (no confirmation)', 
+                  approveMode == ''),
+              enabled: !isApproveModeFixed,
+            ),
             if (showPasswordOption) const PopupMenuDivider(),
             if (showPasswordOption &&
                 verificationMethod != kUseTemporaryPassword &&
@@ -168,6 +175,8 @@ class _DropDownAction extends StatelessWidget {
             } else {
               gFFI.serverModel.setApproveMode(defaultOptionApproveMode);
             }
+          } else if (value == 'AutoAcceptConnections') {
+            gFFI.serverModel.setApproveMode('');
           }
         })
   ];
@@ -620,6 +629,8 @@ class _PermissionCheckerState extends State<PermissionChecker> {
                 ]),
           PermissionRow(translate("Enable clipboard"), serverModel.clipboardOk,
               serverModel.toggleClipboard),
+          const Divider(),
+          AutoStartServiceOption(),
         ]));
   }
 }
@@ -917,6 +928,49 @@ void androidChannelInit() {
     }
     return "";
   });
+}
+
+class AutoStartServiceOption extends StatefulWidget {
+  @override
+  State<AutoStartServiceOption> createState() => _AutoStartServiceOptionState();
+}
+
+class _AutoStartServiceOptionState extends State<AutoStartServiceOption> {
+  late bool autoStartEnabled;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAutoStartSetting();
+  }
+
+  _loadAutoStartSetting() async {
+    final enabled = await bind.mainGetOption(key: kOptionAutoStartService);
+    setState(() {
+      autoStartEnabled = enabled == 'Y';
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SwitchListTile(
+      visualDensity: VisualDensity.compact,
+      contentPadding: EdgeInsets.all(0),
+      title: Text('Auto-start service on app launch'),
+      subtitle:
+          Text('Start the service automatically when the app opens'),
+      value: autoStartEnabled,
+      onChanged: (bool value) async {
+        await bind.mainSetOption(
+          key: kOptionAutoStartService,
+          value: value ? 'Y' : 'N',
+        );
+        setState(() {
+          autoStartEnabled = value;
+        });
+      },
+    );
+  }
 }
 
 void showScamWarning(BuildContext context, ServerModel serverModel) {

@@ -185,6 +185,13 @@ void runMobileApp() async {
   draggablePositions.load();
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
+  
+  // Initialize auto-start service and auto-accept connections
+  if (isAndroid) {
+    gFFI.serverModel.initAutoStartService();
+    gFFI.serverModel.initAutoAcceptConnections();
+  }
+  
   runApp(App());
   await initUniLinks();
 }
