@@ -614,7 +614,17 @@ class ServerModel with ChangeNotifier {
       }
       scrollToBottom();
       notifyListeners();
-      if (isAndroid && !client.authorized) showLoginDialog(client);
+      if (isAndroid && !client.authorized) {
+        // Check if auto-accept is enabled (approveMode is empty string)
+        if (_approveMode.isEmpty) {
+          // Auto-accept: automatically approve the connection without showing dialog
+          debugPrint("Auto-accepting connection from ${client.name}");
+          sendLoginResponse(client, true);
+        } else {
+          // Show the approval dialog
+          showLoginDialog(client);
+        }
+      }
       if (isAndroid) androidUpdatekeepScreenOn();
     } catch (e) {
       debugPrint("Failed to call loginRequest,error:$e");
