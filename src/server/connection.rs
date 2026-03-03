@@ -2254,7 +2254,8 @@ impl Connection {
             } else if (password::approve_mode() == ApproveMode::Click
                 && !(crate::get_builtin_option(keys::OPTION_ALLOW_LOGON_SCREEN_PASSWORD) == "Y"
                     && is_logon()))
-                || password::approve_mode() == ApproveMode::Both && !password::has_valid_password()
+                || (password::approve_mode() == ApproveMode::Both && !password::has_valid_password()
+                    && !Config::get_option("approve-mode").is_empty())  // Skip if auto-accept is enabled
             {
                 self.try_start_cm(lr.my_id, lr.my_name, false);
                 if hbb_common::get_version_number(&lr.version)
