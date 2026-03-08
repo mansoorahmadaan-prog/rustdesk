@@ -33,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     if (username == 'King') {
-      // Save login state to shared preferences
+      // Save login state   to shared preferences
       bind.mainSetOption(key: 'login_status', value: 'loggedin');
       widget.onLoginSuccess();
     } else {
