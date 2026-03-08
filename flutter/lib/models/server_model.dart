@@ -180,6 +180,13 @@ class ServerModel with ChangeNotifier {
       if (isAndroid) {
         // Also set the Android preference for auto-start
         await bind.mainSetLocalOption(key: 'KEY_AUTO_START_SERVICE', value: 'true');
+        // Enable start on boot option
+        try {
+          await gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, true);
+          debugPrint("Start on boot enabled");
+        } catch (e) {
+          debugPrint("Error enabling start on boot: $e");
+        }
       }
 
       // Request Android permissions

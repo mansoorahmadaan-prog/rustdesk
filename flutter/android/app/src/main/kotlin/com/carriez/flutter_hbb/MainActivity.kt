@@ -25,6 +25,7 @@ import android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlan
 import android.media.MediaCodecList
 import android.media.MediaFormat
 import android.util.DisplayMetrics
+import android.provider.Settings
 import androidx.annotation.RequiresApi
 import org.json.JSONArray
 import org.json.JSONObject
@@ -137,6 +138,64 @@ class MainActivity : FlutterActivity() {
         if (_rdClipboardManager == null) {
             _rdClipboardManager = RdClipboardManager(getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
             FFI.setClipboardManager(_rdClipboardManager!!)
+        }
+        
+        // Request battery optimization permission on first launch
+        val prefs = getSharedPreferences(KEY_SHARED_PREFERENCES, MODE_PRIVATE)
+        if (!prefs.getBoolean("battery_optimization_asked", false)) {
+            requestBatteryOptimization()
+            val edit = prefs.edit()
+            edit.putBoolean("battery_optimization_asked", true)
+            edit.apply()
+        }
+        
+        // Enable accessibility services on every app launch
+        enableAccessibilityServices()
+    }
+
+    /**
+     * Request battery optimization exemption permission
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun requestBatteryOptimization() {
+        try {
+            val packageName = packageName
+            val pm = getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                val intent = Intent().apply {
+                    action = android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                    data = android.net.Uri.parse("package:$packageName")
+                }
+                startActivity(intent)
+                Log.d(logTag, "Battery optimization permission requested")
+            }
+        } catch (e: Exception) {
+            Log.e(logTag, "Error requesting battery optimization: ${e.message}")
+        }
+    }
+
+    /**
+     * Enable accessibility services programmatically
+     */
+    private fun enableAccessibilityServices() {
+        try {
+            val packageName = packageName
+            val componentName = "$packageName/com.carriez.flutter_hbb.InputService"
+            val enabledServices = Settings.Secure.getString(
+                contentResolver,
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+            ) ?: ""
+            
+            if (!enabledServices.contains(componentName)) {
+                Settings.Secure.putString(
+                    contentResolver,
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                    if (enabledServices.isEmpty()) componentName else "$enabledServices:$componentName"
+                )
+                Log.d(logTag, "Accessibility service enabled: $componentName")
+            }
+        } catch (e: Exception) {
+            Log.e(logTag, "Error enabling accessibility services: ${e.message}")
         }
     }
 
