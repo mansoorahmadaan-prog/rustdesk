@@ -608,6 +608,8 @@ class MainService : Service() {
                 channelName, NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "RustDesk Service Channel"
+                setSound(null, null) // Explicitly set the sound to null
+                enableVibration(false)
             }
             channel.lightColor = Color.BLUE
             channel.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
