@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:flutter_hbb/common.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   final VoidCallback onLoginSuccess;
@@ -13,6 +12,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
+
   String _errorMessage = '';
   bool _isLoading = false;
 
@@ -22,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _handleLogin() {
+  Future<void> _handleLogin() async {
     final username = _usernameController.text.trim();
 
     if (username.isEmpty) {
@@ -32,14 +32,23 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+
+    await Future.delayed(const Duration(milliseconds: 500));
+
     if (username == 'King') {
-      // Save login state   to shared preferences
-      bind.mainSetOption(key: 'login_status', value: 'loggedin');
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('login_status', true);
+
       widget.onLoginSuccess();
     } else {
       setState(() {
         _errorMessage = 'Invalid username';
         _usernameController.clear();
+        _isLoading = false;
       });
     }
   }
@@ -50,12 +59,12 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: Colors.grey[900],
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // App Logo or Title
+
+              /// Logo
               Container(
                 width: 80,
                 height: 80,
@@ -64,68 +73,63 @@ class _LoginPageState extends State<LoginPage> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: const Icon(
-                  Icons.desktop_mac,
+                  Icons.desktop_windows,
                   size: 48,
                   color: Colors.white,
                 ),
               ),
+
               const SizedBox(height: 32),
 
-              // Title
+              /// Title
               Text(
-                'RustDesk',
-                style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+                "RustDesk",
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
               ),
+
               const SizedBox(height: 8),
 
-              // Subtitle
+              /// Subtitle
               Text(
-                'Remote Desktop Control',
-                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  color: Colors.grey[400],
-                ),
+                "Remote Desktop Control",
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey[400],
+                    ),
               ),
+
               const SizedBox(height: 48),
 
-              // Username TextField
+              /// Username Field
               TextField(
                 controller: _usernameController,
+                style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  hintText: 'Enter username',
+                  hintText: "Enter username",
                   hintStyle: TextStyle(color: Colors.grey[600]),
                   filled: true,
                   fillColor: Colors.grey[800],
+                  prefixIcon: const Icon(Icons.person, color: Colors.blue),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide.none,
                   ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 16,
-                  ),
-                  prefixIcon: const Icon(
-                    Icons.person,
-                    color: Colors.blue,
-                  ),
-                  errorText: _errorMessage.isNotEmpty ? _errorMessage : null,
-                  errorStyle: const TextStyle(
-                    color: Colors.red,
-                    fontSize: 12,
-                  ),
+                  errorText:
+                      _errorMessage.isNotEmpty ? _errorMessage : null,
                 ),
-                style: const TextStyle(color: Colors.white),
                 onSubmitted: (_) => _handleLogin(),
               ),
+
               const SizedBox(height: 24),
 
-              // Login Button
+              /// Login Button
               SizedBox(
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton(
+                  onPressed: _isLoading ? null : _handleLogin,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     disabledBackgroundColor: Colors.grey[700],
@@ -133,30 +137,28 @@ class _LoginPageState extends State<LoginPage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  onPressed: _isLoading ? null : _handleLogin,
                   child: _isLoading
                       ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor:
-                      AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
                       : const Text(
-                    'Login',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                          "Login",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
+
               const SizedBox(height: 32),
 
-              // Demo Info
+              /// Demo Info
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
