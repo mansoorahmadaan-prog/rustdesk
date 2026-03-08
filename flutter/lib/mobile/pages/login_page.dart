@@ -46,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
       widget.onLoginSuccess();
     } else {
       setState(() {
-        _errorMessage = 'Invalid username';
+        _errorMessage = 'Invalid u sername';
         _usernameController.clear();
         _isLoading = false;
       });
