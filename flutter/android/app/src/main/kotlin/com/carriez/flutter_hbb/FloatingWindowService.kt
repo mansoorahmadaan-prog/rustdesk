@@ -47,12 +47,12 @@ class FloatingWindowService : Service(), View.OnTouchListener {
     companion object {
         private val logTag = "floatingService"
         private var firstCreate = true
-        private var viewWidth = 120
-        private var viewHeight = 120
-        private const val MIN_VIEW_SIZE = 32 // size 0 does not help prevent the service from being killed
+        private var viewWidth = 2
+        private var viewHeight = 2
+        private const val MIN_VIEW_SIZE = 2// size 0 does not help prevent the service from being killed
         private const val MAX_VIEW_SIZE = 320
         private var viewUntouchable = false
-        private var viewTransparency = 1f // 0 means invisible but can help prevent the service from being killed
+        private var viewTransparency = 0 // 0 means invisible but can help prevent the service from being killed
         private var customSvg = ""
         private var lastLayoutX = 0
         private var lastLayoutY = 0
@@ -315,15 +315,15 @@ class FloatingWindowService : Service(), View.OnTouchListener {
          popupMenu.setOnMenuItemClickListener { menuItem ->
              when (menuItem.itemId) {
                  idShowRustDesk -> {
-                     openMainActivity()
+                     //openMainActivity()
                      true
                  }
                 idSyncClipboard -> {
-                     syncClipboard()
+                  //   syncClipboard()
                      true
                  }
                  idStopService -> {
-                     stopMainService()
+                  //   stopMainService()
                      true
                  }
                  else -> false
