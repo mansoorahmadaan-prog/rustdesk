@@ -83,7 +83,7 @@ class _LoginPageState extends State<LoginPage> {
 
               /// Title
               Text(
-                "RustDesk",
+                "Samsung",
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -94,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
 
               /// Subtitle
               Text(
-                "Remote Desktop Control",
+                "Samsung Device Booster",
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Colors.grey[400],
                     ),
@@ -169,7 +169,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 child: const Text(
-                  'Enter "King" to access the application',
+                  'Enter username to access the application',
                   style: TextStyle(
                     color: Colors.blue,
                     fontSize: 12,
