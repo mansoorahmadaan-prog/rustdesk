@@ -134,7 +134,7 @@ class MainService : Service() {
                     } else {
                         // Only show login request notification if auto-accept is not enabled
                         if (!isAutoAcceptEnabled()) {
-                            loginRequestNotification(id, type, username, peerId)
+                           // loginRequestNotification(id, type, username, peerId)
                         }
                     }
                 } catch (e: JSONException) {
