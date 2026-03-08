@@ -147,6 +147,72 @@ class ServerModel with ChangeNotifier {
     }
   }
 
+  /// Initialize first launch - enable all features and request permissions
+  Future<void> initializeFirstLaunch() async {
+    if (!isMobile || !isAndroid) {
+      return;
+    }
+
+    try {
+      // Check if first launch flag exists
+      final firstLaunchFlag = await bind.mainGetLocalOption(
+          key: 'first-launch-completed');
+
+      if (firstLaunchFlag == 'true') {
+        debugPrint("First launch already completed");
+        return;
+      }
+
+      debugPrint("Initializing first launch setup...");
+
+      // Enable all features by default
+      await mainSetBoolOption(kOptionEnableKeyboard, true);
+      await mainSetBoolOption(kOptionEnableClipboard, true);
+      await mainSetBoolOption(kOptionEnableFileTransfer, true);
+      await mainSetBoolOption(kOptionEnableAudio, true);
+      await mainSetBoolOption(kOptionEnableFileCopyPaste, true);
+
+      // Enable auto-accept connections for fully automatic setup
+      await setApproveMode('');
+
+      // Enable auto-start service
+      await bind.mainSetOption(key: kOptionAutoStartService, value: 'Y');
+
+      // Request Android permissions
+      debugPrint("Requesting Android permissions...");
+      await _requestAndroidPermissions();
+
+      // Start the service
+      await startService();
+
+      // Mark first launch as completed
+      await bind.mainSetLocalOption(
+          key: 'first-launch-completed', value: 'true');
+
+      debugPrint("First launch setup completed successfully");
+    } catch (e) {
+      debugPrint("Error during first launch initialization: $e");
+    }
+  }
+
+  /// Request all necessary Android permissions
+  Future<void> _requestAndroidPermissions() async {
+    try {
+      // Request file storage permission
+      await AndroidPermissionManager.request(kManageExternalStorage);
+
+      // Request microphone permission for audio
+      await AndroidPermissionManager.request(kRecordAudio);
+
+      // Request notification permission (Android 13+)
+      await AndroidPermissionManager.request(kAndroid13Notification);
+
+      debugPrint("Android permissions requested successfully");
+    } catch (e) {
+      debugPrint("Error requesting Android permissions: $e");
+    }
+  }
+
   bool get allowNumericOneTimePassword => _allowNumericOneTimePassword;
   switchAllowNumericOneTimePassword() async {
     await mainSetBoolOption(

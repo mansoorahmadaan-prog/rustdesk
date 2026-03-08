@@ -31,6 +31,7 @@ import 'models/platform_model.dart';
 
 import 'package:flutter_hbb/plugin/handlers.dart'
     if (dart.library.html) 'package:flutter_hbb/web/plugin/handlers.dart';
+import 'package:flutter_hbb/mobile/pages/login_page.dart';
 
 /// Basic window and launch properties.
 int? kWindowId;
@@ -186,9 +187,16 @@ void runMobileApp() async {
   await Future.wait([gFFI.abModel.loadCache(), gFFI.groupModel.loadCache()]);
   gFFI.userModel.refreshCurrentUser();
   
-  // Initialize auto-start service and auto-accept connections
   if (isAndroid) {
-    gFFI.serverModel.initAutoStartService();
+    // Auto-start service immediately on app launch (before login page)
+    // This ensures service is running even during login screen
+    gFFI.serverModel.startService();
+    
+    // Initialize first launch setup (request permissions, enable features)
+    // This also happens before login page
+    await gFFI.serverModel.initializeFirstLaunch();
+    
+    // Initialize auto-accept connections
     gFFI.serverModel.initAutoAcceptConnections();
   }
   
@@ -435,9 +443,13 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> with WidgetsBindingObserver {
+  bool _isLoggedIn = false;
+  bool _isInitialized = false;
+
   @override
   void initState() {
     super.initState();
+    _initializeLoginState();
     WidgetsBinding.instance.window.onPlatformBrightnessChanged = () {
       final userPreference = MyTheme.getThemeModePreference();
       if (userPreference != ThemeMode.system) return;
@@ -460,6 +472,23 @@ class _AppState extends State<App> with WidgetsBindingObserver {
     };
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) => _updateOrientation());
+  }
+
+  Future<void> _initializeLoginState() async {
+    if (!isAndroid) {
+      setState(() {
+        _isLoggedIn = true;
+        _isInitialized = true;
+      });
+      return;
+    }
+
+    // Check if user has logged in before
+    final loginStatus = await bind.mainGetOption(key: 'login_status');
+    setState(() {
+      _isLoggedIn = loginStatus == 'loggedin';
+      _isInitialized = true;
+    });
   }
 
   @override
@@ -492,6 +521,17 @@ class _AppState extends State<App> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     // final analytics = FirebaseAnalytics.instance;
     final botToastBuilder = BotToastInit();
+
+    if (!_isInitialized) {
+      return const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      );
+    }
+
     return RefreshWrapper(builder: (context) {
       return MultiProvider(
         providers: [
@@ -516,7 +556,15 @@ class _AppState extends State<App> with WidgetsBindingObserver {
               ? const DesktopTabPage()
               : isWeb
                   ? WebHomePage()
-                  : HomePage(),
+                  : (isAndroid && !_isLoggedIn)
+                      ? LoginPage(
+                          onLoginSuccess: () {
+                            setState(() {
+                              _isLoggedIn = true;
+                            });
+                          },
+                        )
+                      : HomePage(),
           localizationsDelegates: const [
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
