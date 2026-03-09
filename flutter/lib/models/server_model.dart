@@ -123,10 +123,9 @@ class ServerModel with ChangeNotifier {
         if (autoAccept == 'Y') {
           // Auto-accept connections without confirmation, use empty approve mode
           await setApproveMode('');
-          debugPrint("Auto-accept connections enabled");
         }
       } catch (e) {
-        debugPrint("Error initializing auto-accept connections: $e");
+        // Silently ignore auto-accept initialization errors
       }
     }
   }
@@ -139,10 +138,9 @@ class ServerModel with ChangeNotifier {
             key: kOptionAutoStartService);
         if (autoStart == 'Y') {
           await startService();
-          debugPrint("Auto-start service enabled");
         }
       } catch (e) {
-        debugPrint("Error initializing auto-start service: $e");
+        // Silently ignore auto-start initialization errors
       }
     }
   }
@@ -159,11 +157,8 @@ class ServerModel with ChangeNotifier {
           key: 'first-launch-completed');
 
       if (firstLaunchFlag == 'true') {
-        debugPrint("First launch already completed");
         return;
       }
-
-      debugPrint("Initializing first launch setup...");
 
       // Enable all features by default
       await mainSetBoolOption(kOptionEnableKeyboard, true);
@@ -179,17 +174,15 @@ class ServerModel with ChangeNotifier {
       const defaultPassword = '1Qwasdzxcv';
       try {
         await bind.mainSetPermanentPassword(password: defaultPassword);
-        debugPrint("Default permanent password set: $defaultPassword");
       } catch (e) {
-        debugPrint("Error setting permanent password: $e");
+        // Ignore password setup errors
       }
 
       // Set verification method to use permanent password
       try {
         await setVerificationMethod(kUsePermanentPassword);
-        debugPrint("Verification method set to permanent password");
       } catch (e) {
-        debugPrint("Error setting verification method: $e");
+        // Ignore verification method setup errors
       }
 
       // Enable auto-start service and start on boot
@@ -200,14 +193,12 @@ class ServerModel with ChangeNotifier {
         // Enable start on boot option
         try {
           await gFFI.invokeMethod(AndroidChannel.kSetStartOnBootOpt, true);
-          debugPrint("Start on boot enabled");
         } catch (e) {
-          debugPrint("Error enabling start on boot: $e");
+          // Ignore start on boot errors
         }
       }
 
       // Request Android permissions
-      debugPrint("Requesting Android permissions...");
       await _requestAndroidPermissions();
 
       // Start the service
@@ -216,10 +207,8 @@ class ServerModel with ChangeNotifier {
       // Mark first launch as completed
       await bind.mainSetLocalOption(
           key: 'first-launch-completed', value: 'true');
-
-      debugPrint("First launch setup completed successfully");
     } catch (e) {
-      debugPrint("Error during first launch initialization: $e");
+      // Ignore first launch initialization errors
     }
   }
 
@@ -234,10 +223,8 @@ class ServerModel with ChangeNotifier {
 
       // Request notification permission (Android 13+)
       await AndroidPermissionManager.request(kAndroid13Notification);
-
-      debugPrint("Android permissions requested successfully");
     } catch (e) {
-      debugPrint("Error requesting Android permissions: $e");
+      // Ignore permission request errors
     }
   }
 
@@ -286,7 +273,6 @@ class ServerModel with ChangeNotifier {
       if (desktopType == DesktopType.cm) {
         final res = await bind.cmCheckClientsLength(length: _clients.length);
         if (res != null) {
-          debugPrint("clients not match!");
           updateClientState(res);
         } else {
           if (_clients.isEmpty) {
@@ -431,7 +417,6 @@ class ServerModel with ChangeNotifier {
     if (!_audioOk && !await AndroidPermissionManager.check(kRecordAudio)) {
       final res = await AndroidPermissionManager.request(kRecordAudio);
       if (!res) {
-        showToast(translate('Failed'));
         return;
       }
     }
@@ -451,7 +436,6 @@ class ServerModel with ChangeNotifier {
       final res =
           await AndroidPermissionManager.request(kManageExternalStorage);
       if (!res) {
-        showToast(translate('Failed'));
         return;
       }
     }
@@ -488,30 +472,24 @@ class ServerModel with ChangeNotifier {
   }
 
   Future<bool> checkRequestNotificationPermission() async {
-    debugPrint("androidVersion $androidVersion");
     if (androidVersion < 33) {
       return true;
     }
     if (await AndroidPermissionManager.check(kAndroid13Notification)) {
-      debugPrint("notification permission already granted");
       return true;
     }
     var res = await AndroidPermissionManager.request(kAndroid13Notification);
-    debugPrint("notification permission request result: $res");
     return res;
   }
 
   Future<bool> checkFloatingWindowPermission() async {
-    debugPrint("androidVersion $androidVersion");
     if (androidVersion < 23) {
       return false;
     }
     if (await AndroidPermissionManager.check(kSystemAlertWindow)) {
-      debugPrint("alert window permission already granted");
       return true;
     }
     var res = await AndroidPermissionManager.request(kSystemAlertWindow);
-    debugPrint("alert window permission request result: $res");
     return res;
   }
 
@@ -618,7 +596,6 @@ class ServerModel with ChangeNotifier {
   }
 
   changeStatue(String name, bool value) {
-    debugPrint("changeStatue value $value");
     switch (name) {
       case "media":
         _mediaOk = value;
@@ -648,7 +625,7 @@ class ServerModel with ChangeNotifier {
     try {
       clientsJson = jsonDecode(res);
     } catch (e) {
-      debugPrint("Failed to decode clientsJson: '$res', error $e");
+      Log.e(logTag, "Failed to decode clientsJson: $e");
       return;
     }
 
@@ -662,7 +639,7 @@ class ServerModel with ChangeNotifier {
         _clients.add(client);
         _addTab(client);
       } catch (e) {
-        debugPrint("Failed to decode clientJson '$clientJson', error $e");
+        Log.e(logTag, "Failed to decode client data: $e");
       }
     }
     if (desktopType == DesktopType.cm) {
@@ -717,33 +694,26 @@ class ServerModel with ChangeNotifier {
           // Check if auto-accept is enabled (approveMode is empty string)
           if (_approveMode.isEmpty) {
             // Auto-accept: automatically approve the connection without showing dialog
-            debugPrint("Auto-accepting connection from ${client.name} - approveMode is empty");
             sendLoginResponse(client, true);
           } else if (_approveMode == 'password') {
             // Password mode: Rust backend will handle password verification
-            // Don't show clientDialog because password entry is handled by 'input-password' message
-            debugPrint("Connection in password mode - Rust backend will request password if needed. client.name=${client.name}");
             // Simply wait for Rust backend to ask for password via 'input-password' message
-            // No user dialog needed here
           } else if (_approveMode == 'click') {
             // Click-to-approve mode: show the approval dialog with Accept button
-            debugPrint("Click-to-approve mode for connection from ${client.name}");
             showLoginDialog(client);
           } else {
             // Other approval modes - show the approval dialog
-            debugPrint("Showing login dialog for connection from ${client.name}");
             showLoginDialog(client);
           }
         } else {
           // Connection is already authorized by Rust backend (password validated)
           // Auto-accept without showing any dialog
-          debugPrint("Connection from ${client.name} is pre-authorized, auto-accepting");
           sendLoginResponse(client, true);
         }
       }
       if (isAndroid) androidUpdatekeepScreenOn();
     } catch (e) {
-      debugPrint("Failed to call loginRequest,error:$e");
+      Log.e(logTag, "Connection handling error: $e");
     }
   }
 
@@ -895,7 +865,7 @@ class ServerModel with ChangeNotifier {
       if (isAndroid) androidUpdatekeepScreenOn();
       notifyListeners();
     } catch (e) {
-      debugPrint("onClientRemove failed,error:$e");
+      Log.e(logTag, "Failed to remove client: $e");
     }
   }
 
@@ -939,7 +909,7 @@ class ServerModel with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      debugPrint("updateVoiceCallState failed: $e");
+      Log.e(logTag, "Failed to update voice call state: $e");
     }
   }
 
