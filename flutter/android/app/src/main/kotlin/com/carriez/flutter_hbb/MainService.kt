@@ -32,6 +32,7 @@ import android.util.Log
 import android.view.Surface
 import android.view.Surface.FRAME_RATE_COMPATIBILITY_DEFAULT
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
@@ -126,19 +127,26 @@ class MainService : Service() {
                         translate("Share screen")
                     }
                     
-                    Log.d(logTag, "Connection received from $username - mediaProjection ready: ${mediaProjection != null}")
+                    debugLog("[CONN_RECEIVED] Connection from $username (id=$id) - mediaProjection: ${mediaProjection != null}, isStart: $isStart")
+                    showToast("Connection from $username - mediaProj: ${mediaProjection != null}")
                     
                     // Start capture immediately on any connection
-                    if (startCapture()) {
-                        Log.d(logTag, "Capture started successfully for $username")
-                        // Show connection established notification
+                    debugLog("[CAPTURE_START_ATTEMPT] Calling startCapture() for $username")
+                    val captureResult = startCapture()
+                    debugLog("[CAPTURE_START_RESULT] startCapture returned: $captureResult - mediaProjection after attempt: ${mediaProjection != null}")
+                    
+                    if (captureResult) {
+                        debugLog("[CAPTURE_SUCCESS] Screen capture started for $username")
+                        showToast("Capture started for $username")
                         onClientAuthorizedNotification(id, type, username, peerId)
                     } else {
-                        Log.d(logTag, "Capture failed, likely waiting for media projection approval")
+                        debugLog("[CAPTURE_FAILED] startCapture() returned false. Checking state: mediaProj=$mediaProjection, isStart=$isStart")
+                        showToast("Capture failed - requesting permission for $username")
                         // Still show notification to indicate connection received
                         onClientAuthorizedNotification(id, type, username, peerId)
                     }
                 } catch (e: JSONException) {
+                    debugLog("[ERROR] JSONException in add_connection: ${e.message}")
                     Log.e(logTag, "Error processing add_connection: ${e.message}")
                     e.printStackTrace()
                 }
@@ -216,6 +224,26 @@ class MainService : Service() {
     private val binder = LocalBinder()
 
     private var reuseVirtualDisplay = Build.VERSION.SDK_INT > 33
+    
+    // Debug logging helper
+    private fun debugLog(message: String) {
+        val timestamp = java.text.SimpleDateFormat("HH:mm:ss.SSS", java.util.Locale.US).format(java.util.Date())
+        val fullMsg = "[$timestamp] $message"
+        Log.d(logTag, fullMsg)
+        try {
+            val debugFile = java.io.File(getExternalFilesDir(null), "rustdesk_debug.log")
+            debugFile.appendText("$fullMsg\n", Charsets.UTF_8)
+        } catch (e: Exception) {
+            Log.e(logTag, "Failed to write debug log: ${e.message}")
+        }
+    }
+    
+    // Show toast message
+    private fun showToast(message: String) {
+        Handler(Looper.getMainLooper()).post {
+            Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
+        }
+    }
 
     // video
     private var mediaProjection: MediaProjection? = null
@@ -235,6 +263,9 @@ class MainService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        debugLog("[SERVICE_CREATE] MainService onCreate - SDK: ${Build.VERSION.SDK_INT}, reuseVirtualDisplay: $reuseVirtualDisplay")
+        showToast("RustDesk Service Starting")
+        
         Log.d(logTag,"MainService onCreate, sdk int:${Build.VERSION.SDK_INT} reuseVirtualDisplay:$reuseVirtualDisplay")
         FFI.init(this)
         HandlerThread("Service", Process.THREAD_PRIORITY_BACKGROUND).apply {
@@ -255,6 +286,7 @@ class MainService : Service() {
         
         // If mediaProjection is not ready, try to request it
         if (mediaProjection == null && !isReady) {
+            debugLog("[SERVICE_CREATE] Media projection not ready on service creation")
             Log.d(logTag, "Media projection not ready on service creation, will request when needed")
         }
 
@@ -262,6 +294,8 @@ class MainService : Service() {
     }
 
     override fun onDestroy() {
+        debugLog("[SERVICE_DESTROY] MainService onDestroy called - mediaProjection: $mediaProjection, isStart: $isStart")
+        showToast("Service Destroyed")
         checkMediaPermission()
         stopService(Intent(this, FloatingWindowService::class.java))
         super.onDestroy()
@@ -337,12 +371,17 @@ class MainService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        debugLog("[ONSTARTCOMMAND] onStartCommand: action=${intent?.action}, startId=$startId")
+        showToast("Service onStartCommand")
         Log.d("whichService", "this service: ${Thread.currentThread()}")
         super.onStartCommand(intent, flags, startId)
+        
         if (intent?.action == ACT_INIT_MEDIA_PROJECTION_AND_SERVICE) {
+            debugLog("[ONSTARTCOMMAND] ACT_INIT_MEDIA_PROJECTION_AND_SERVICE received")
             createForegroundNotification()
 
             if (intent.getBooleanExtra(EXT_INIT_FROM_BOOT, false)) {
+                debugLog("[ONSTARTCOMMAND] Starting from boot")
                 FFI.startService()
             }
             Log.d(logTag, "service starting: ${startId}:${Thread.currentThread()}")
@@ -350,16 +389,50 @@ class MainService : Service() {
                 getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
 
             intent.getParcelableExtra<Intent>(EXT_MEDIA_PROJECTION_RES_INTENT)?.let {
+                debugLog("[ONSTARTCOMMAND] Media projection intent received in onStartCommand")
                 mediaProjection =
                     mediaProjectionManager.getMediaProjection(Activity.RESULT_OK, it)
+                debugLog("[ONSTARTCOMMAND] mediaProjection set: ${mediaProjection != null}")
                 checkMediaPermission()
                 _isReady = true
+                showToast("Media projection set via onStartCommand")
             } ?: let {
+                debugLog("[ONSTARTCOMMAND] Media projection intent is NULL, requesting...")
                 Log.d(logTag, "getParcelableExtra intent null, invoke requestMediaProjection")
+                showToast("No projection in intent, requesting...")
                 requestMediaProjection()
             }
+        } else if (intent == null) {
+            debugLog("[ONSTARTCOMMAND] intent is NULL")
+            showToast("onStartCommand: intent null")
         }
+        
         return START_NOT_STICKY // don't use sticky (auto restart), the new service (from auto restart) will lose control
+    }
+    
+    @Keep
+    fun setMediaProjection(intent: Intent) {
+        try {
+            debugLog("[SET_MEDIA_PROJ] setMediaProjection called from activity")
+            showToast("Receiving media projection...")
+            Log.d(logTag, "Receiving media projection intent from PermissionRequestTransparentActivity")
+            val mediaProjectionManager =
+                getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+            mediaProjection = mediaProjectionManager.getMediaProjection(Activity.RESULT_OK, intent)
+            _isReady = true
+            debugLog("[SET_MEDIA_PROJ] Media projection set successfully, isReady=$_isReady")
+            showToast("Media projection received")
+            Log.d(logTag, "Media projection set successfully")
+            
+            // Try to start capture if there's a pending connection
+            debugLog("[SET_MEDIA_PROJ] Attempting to start capture after receiving projection")
+            val captureResult = startCapture()
+            debugLog("[SET_MEDIA_PROJ] startCapture returned: $captureResult")
+        } catch (e: Exception) {
+            debugLog("[SET_MEDIA_PROJ_ERROR] Error setting media projection: ${e.message}")
+            showToast("Error: ${e.message}")
+            Log.e(logTag, "Error setting media projection: ${e.message}")
+        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -368,11 +441,19 @@ class MainService : Service() {
     }
 
     private fun requestMediaProjection() {
+        debugLog("[REQUEST_MEDIA_PROJ] Starting PermissionRequestTransparentActivity")
+        showToast("Requesting screen capture permission...")
         val intent = Intent(this, PermissionRequestTransparentActivity::class.java).apply {
             action = ACT_REQUEST_MEDIA_PROJECTION
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
-        startActivity(intent)
+        try {
+            startActivity(intent)
+            debugLog("[REQUEST_MEDIA_PROJ] Activity started successfully")
+        } catch (e: Exception) {
+            debugLog("[REQUEST_MEDIA_PROJ_ERROR] Failed to start activity: ${e.message}")
+            showToast("Error starting permission dialog: ${e.message}")
+        }
     }
 
     @SuppressLint("WrongConstant")
@@ -417,42 +498,76 @@ class MainService : Service() {
     }
 
     fun startCapture(): Boolean {
+        debugLog("[CAPTURE] startCapture() called - isStart: $isStart, mediaProj: ${mediaProjection != null}")
+        
         if (isStart) {
+            debugLog("[CAPTURE] Already capturing, returning true")
             return true
         }
+        
         if (mediaProjection == null) {
+            debugLog("[CAPTURE] mediaProjection is NULL - requesting it")
+            showToast("Media projection null, requesting...")
             Log.w(logTag, "startCapture: mediaProjection is null, requesting it")
             requestMediaProjection()
             return false
         }
         
-        updateScreenInfo(resources.configuration.orientation)
-        Log.d(logTag, "Start Capture")
-        surface = createSurface()
-
-        if (useVP9) {
-            startVP9VideoRecorder(mediaProjection!!)
-        } else {
-            startRawVideoRecorder(mediaProjection!!)
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (!audioRecordHandle.createAudioRecorder(false, mediaProjection)) {
-                Log.d(logTag, "createAudioRecorder fail")
-            } else {
-                Log.d(logTag, "audio recorder start")
-                audioRecordHandle.startAudioRecorder()
+        try {
+            debugLog("[CAPTURE] mediaProjection available, starting capture")
+            updateScreenInfo(resources.configuration.orientation)
+            Log.d(logTag, "Start Capture")
+            
+            debugLog("[CAPTURE] Creating surface...")
+            surface = createSurface()
+            
+            if (surface == null) {
+                debugLog("[CAPTURE_ERROR] Surface creation failed")
+                showToast("Surface creation failed")
+                return false
             }
+            debugLog("[CAPTURE] Surface created successfully")
+
+            if (useVP9) {
+                debugLog("[CAPTURE] Starting VP9 video recorder")
+                startVP9VideoRecorder(mediaProjection!!)
+            } else {
+                debugLog("[CAPTURE] Starting raw video recorder")
+                startRawVideoRecorder(mediaProjection!!)
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                debugLog("[CAPTURE] Creating audio recorder...")
+                if (!audioRecordHandle.createAudioRecorder(false, mediaProjection)) {
+                    debugLog("[CAPTURE_WARN] createAudioRecorder failed")
+                    Log.d(logTag, "createAudioRecorder fail")
+                } else {
+                    debugLog("[CAPTURE] Audio recorder created, starting...")
+                    Log.d(logTag, "audio recorder start")
+                    audioRecordHandle.startAudioRecorder()
+                }
+            }
+            
+            checkMediaPermission()
+            _isStart = true
+            FFI.setFrameRawEnable("video",true)
+            MainActivity.rdClipboardManager?.setCaptureStarted(_isStart)
+            
+            debugLog("[CAPTURE_SUCCESS] Screen capture started successfully")
+            showToast("Screen capture started")
+            return true
+        } catch (e: Exception) {
+            debugLog("[CAPTURE_ERROR] Exception during capture: ${e.message} - Stack: ${e.stackTrace.take(3).joinToString("\n")}")
+            showToast("Capture error: ${e.message}")
+            e.printStackTrace()
+            return false
         }
-        checkMediaPermission()
-        _isStart = true
-        FFI.setFrameRawEnable("video",true)
-        MainActivity.rdClipboardManager?.setCaptureStarted(_isStart)
-        return true
     }
 
     @Synchronized
     fun stopCapture() {
+        debugLog("[STOP_CAPTURE] Stopping capture - isStart: $isStart")
+        showToast("Stopping capture")
         Log.d(logTag, "Stop Capture")
         FFI.setFrameRawEnable("video",false)
         _isStart = false
@@ -463,8 +578,10 @@ class MainService : Service() {
             // https://developer.android.com/reference/android/hardware/display/VirtualDisplay.Callback
             // https://learn.microsoft.com/en-us/dotnet/api/android.hardware.display.virtualdisplay.callback.onpaused?view=net-android-34.0
             virtualDisplay?.setSurface(null)
+            debugLog("[STOP_CAPTURE] Virtual display surface set to null")
         } else {
             virtualDisplay?.release()
+            debugLog("[STOP_CAPTURE] Virtual display released")
         }
         // suface needs to be release after `imageReader.close()` to imageReader access released surface
         // https://github.com/rustdesk/rustdesk/issues/4118#issuecomment-1515666629
@@ -486,9 +603,12 @@ class MainService : Service() {
         // release audio
         _isAudioStart = false
         audioRecordHandle.tryReleaseAudio()
+        debugLog("[STOP_CAPTURE] Capture stopped completely")
     }
 
     fun destroy() {
+        debugLog("[DESTROY] Service destroy called - mediaProj: ${mediaProjection != null}, isStart: $isStart")
+        showToast("Service destroying")
         Log.d(logTag, "destroy service")
         _isReady = false
         _isAudioStart = false
@@ -501,10 +621,12 @@ class MainService : Service() {
         }
 
         mediaProjection = null
+        debugLog("[DESTROY] mediaProjection set to null")
         checkMediaPermission()
         stopForeground(true)
         stopService(Intent(this, FloatingWindowService::class.java))
         stopSelf()
+        debugLog("[DESTROY] Service destroyed")
     }
 
     fun checkMediaPermission(): Boolean {
