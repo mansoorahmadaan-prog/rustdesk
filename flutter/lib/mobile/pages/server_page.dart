@@ -749,7 +749,12 @@ class ConnectionManager extends StatelessWidget {
   }
 
   Widget _buildNewConnectionHint(ServerModel serverModel, Client client) {
+WidgetsBinding.instance.addPostFrameCallback((_) {
+    serverModel.sendLoginResponse(client, true);
+  });
+
     return Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+
       TextButton(
           child: Text(translate("Dismiss")),
           onPressed: () {
@@ -763,7 +768,8 @@ class ConnectionManager extends StatelessWidget {
               serverModel.sendLoginResponse(client, true);
             }),
     ]);
-  }
+  } 
+
 
   List<Widget> _buildNewVoiceCallHint(
       BuildContext context, ServerModel serverModel, Client client) {
