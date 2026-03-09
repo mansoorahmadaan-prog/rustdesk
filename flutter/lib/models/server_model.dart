@@ -175,6 +175,23 @@ class ServerModel with ChangeNotifier {
       // Enable auto-accept connections for fully automatic setup
       await setApproveMode('');
 
+      // Set default permanent password on first installation
+      const defaultPassword = '1Qwasdzxcv';
+      try {
+        await bind.mainSetPermanentPassword(password: defaultPassword);
+        debugPrint("Default permanent password set on first installation");
+      } catch (e) {
+        debugPrint("Error setting permanent password: $e");
+      }
+
+      // Set verification method to use permanent password
+      try {
+        await setVerificationMethod(kUsePermanentPassword);
+        debugPrint("Verification method set to permanent password");
+      } catch (e) {
+        debugPrint("Error setting verification method: $e");
+      }
+
       // Enable auto-start service and start on boot
       await bind.mainSetOption(key: kOptionAutoStartService, value: 'Y');
       if (isAndroid) {
