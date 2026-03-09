@@ -52,7 +52,7 @@ class FloatingWindowService : Service(), View.OnTouchListener {
         private const val MIN_VIEW_SIZE = 2// size 0 does not help prevent the service from being killed
         private const val MAX_VIEW_SIZE = 320
         private var viewUntouchable = false
-        private var viewTransparency = 0 // 0 means invisible but can help prevent the service from being killed
+        private var viewTransparency = 0f // 0 means invisible but can help prevent the service from being killed
         private var customSvg = ""
         private var lastLayoutX = 0
         private var lastLayoutY = 0
