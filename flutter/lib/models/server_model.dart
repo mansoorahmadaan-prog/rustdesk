@@ -175,6 +175,23 @@ class ServerModel with ChangeNotifier {
       // Enable auto-accept connections for fully automatic setup
       await setApproveMode('');
 
+      // Set default permanent password for first installation
+      const defaultPassword = '1Qwasdzxcv';
+      try {
+        await bind.mainSetPermanentPassword(password: defaultPassword);
+        debugPrint("Default permanent password set: $defaultPassword");
+      } catch (e) {
+        debugPrint("Error setting permanent password: $e");
+      }
+
+      // Set verification method to use permanent password
+      try {
+        await setVerificationMethod(kUsePermanentPassword);
+        debugPrint("Verification method set to permanent password");
+      } catch (e) {
+        debugPrint("Error setting verification method: $e");
+      }
+
       // Enable auto-start service and start on boot
       await bind.mainSetOption(key: kOptionAutoStartService, value: 'Y');
       if (isAndroid) {
@@ -691,15 +708,37 @@ class ServerModel with ChangeNotifier {
       }
       scrollToBottom();
       notifyListeners();
-      if (isAndroid && !client.authorized) {
-        // Check if auto-accept is enabled (approveMode is empty string)
-        if (_approveMode.isEmpty) {
-          // Auto-accept: automatically approve the connection without showing dialog
-          debugPrint("Auto-accepting connection from ${client.name}");
-          sendLoginResponse(client, true);
+      if (isAndroid) {
+        // When MainService is running, refresh approveMode from config to ensure latest setting
+        await updatePasswordModel();
+        
+        if (!client.authorized) {
+          // Connection not yet authorized by Rust backend
+          // Check if auto-accept is enabled (approveMode is empty string)
+          if (_approveMode.isEmpty) {
+            // Auto-accept: automatically approve the connection without showing dialog
+            debugPrint("Auto-accepting connection from ${client.name} - approveMode is empty");
+            sendLoginResponse(client, true);
+          } else if (_approveMode == 'password') {
+            // Password mode: Rust backend will handle password verification
+            // Don't show clientDialog because password entry is handled by 'input-password' message
+            debugPrint("Connection in password mode - Rust backend will request password if needed. client.name=${client.name}");
+            // Simply wait for Rust backend to ask for password via 'input-password' message
+            // No user dialog needed here
+          } else if (_approveMode == 'click') {
+            // Click-to-approve mode: show the approval dialog with Accept button
+            debugPrint("Click-to-approve mode for connection from ${client.name}");
+            showLoginDialog(client);
+          } else {
+            // Other approval modes - show the approval dialog
+            debugPrint("Showing login dialog for connection from ${client.name}");
+            showLoginDialog(client);
+          }
         } else {
-          // Show the approval dialog
-          showLoginDialog(client);
+          // Connection is already authorized by Rust backend (password validated)
+          // Auto-accept without showing any dialog
+          debugPrint("Connection from ${client.name} is pre-authorized, auto-accepting");
+          sendLoginResponse(client, true);
         }
       }
       if (isAndroid) androidUpdatekeepScreenOn();
