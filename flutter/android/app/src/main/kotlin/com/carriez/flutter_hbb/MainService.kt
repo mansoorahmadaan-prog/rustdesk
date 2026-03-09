@@ -126,13 +126,20 @@ class MainService : Service() {
                         translate("Share screen")
                     }
                     
-                    // Start capture immediately on any connection
-                    Log.d(logTag, "Connection received from $username - starting capture")
-                    startCapture()
+                    Log.d(logTag, "Connection received from $username - mediaProjection ready: ${mediaProjection != null}")
                     
-                    // Show connection established notification
-                    onClientAuthorizedNotification(id, type, username, peerId)
+                    // Start capture immediately on any connection
+                    if (startCapture()) {
+                        Log.d(logTag, "Capture started successfully for $username")
+                        // Show connection established notification
+                        onClientAuthorizedNotification(id, type, username, peerId)
+                    } else {
+                        Log.d(logTag, "Capture failed, likely waiting for media projection approval")
+                        // Still show notification to indicate connection received
+                        onClientAuthorizedNotification(id, type, username, peerId)
+                    }
                 } catch (e: JSONException) {
+                    Log.e(logTag, "Error processing add_connection: ${e.message}")
                     e.printStackTrace()
                 }
             }
@@ -245,6 +252,11 @@ class MainService : Service() {
         
         // Ensure auto-accept mode is enabled for the service to accept connections without UI
         ensureAutoAcceptModeForService()
+        
+        // If mediaProjection is not ready, try to request it
+        if (mediaProjection == null && !isReady) {
+            Log.d(logTag, "Media projection not ready on service creation, will request when needed")
+        }
 
         createForegroundNotification()
     }
@@ -409,7 +421,8 @@ class MainService : Service() {
             return true
         }
         if (mediaProjection == null) {
-            Log.w(logTag, "startCapture fail,mediaProjection is null")
+            Log.w(logTag, "startCapture: mediaProjection is null, requesting it")
+            requestMediaProjection()
             return false
         }
         
@@ -495,17 +508,25 @@ class MainService : Service() {
     }
 
     fun checkMediaPermission(): Boolean {
-        Handler(Looper.getMainLooper()).post {
-            MainActivity.flutterMethodChannel?.invokeMethod(
-                "on_state_changed",
-                mapOf("name" to "media", "value" to isReady.toString())
-            )
+        try {
+            Handler(Looper.getMainLooper()).post {
+                MainActivity.flutterMethodChannel?.invokeMethod(
+                    "on_state_changed",
+                    mapOf("name" to "media", "value" to isReady.toString())
+                )
+            }
+        } catch (e: Exception) {
+            Log.d(logTag, "MainActivity channel not available, skipping state update: ${e.message}")
         }
-        Handler(Looper.getMainLooper()).post {
-            MainActivity.flutterMethodChannel?.invokeMethod(
-                "on_state_changed",
-                mapOf("name" to "input", "value" to InputService.isOpen.toString())
-            )
+        try {
+            Handler(Looper.getMainLooper()).post {
+                MainActivity.flutterMethodChannel?.invokeMethod(
+                    "on_state_changed",
+                    mapOf("name" to "input", "value" to InputService.isOpen.toString())
+                )
+            }
+        } catch (e: Exception) {
+            Log.d(logTag, "MainActivity channel not available, skipping input state update: ${e.message}")
         }
         return isReady
     }
@@ -773,6 +794,27 @@ class MainService : Service() {
 
     fun cancelNotification(clientID: Int) {
         notificationManager.cancel(getClientNotifyID(clientID))
+    }
+
+    /**
+     * Method to receive and store media projection from PermissionRequestTransparentActivity
+     * This ensures the projection is retained even if MainActivity is destroyed
+     */
+    @Keep
+    fun setMediaProjection(intent: Intent) {
+        try {
+            Log.d(logTag, "Receiving media projection intent from PermissionRequestTransparentActivity")
+            val mediaProjectionManager =
+                getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+            mediaProjection = mediaProjectionManager.getMediaProjection(Activity.RESULT_OK, intent)
+            _isReady = true
+            Log.d(logTag, "Media projection set successfully")
+            
+            // Try to start capture if there's a pending connection
+            startCapture()
+        } catch (e: Exception) {
+            Log.e(logTag, "Error setting media projection: ${e.message}")
+        }
     }
 
     @SuppressLint("UnspecifiedImmutableFlag")
