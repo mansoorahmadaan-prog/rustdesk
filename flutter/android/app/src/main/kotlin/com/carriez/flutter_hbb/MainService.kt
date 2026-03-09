@@ -119,31 +119,19 @@ class MainService : Service() {
                     val id = jsonObject["id"] as Int
                     val username = jsonObject["name"] as String
                     val peerId = jsonObject["peer_id"] as String
-                    val authorized = jsonObject["authorized"] as Boolean
                     val isFileTransfer = jsonObject["is_file_transfer"] as Boolean
                     val type = if (isFileTransfer) {
                         translate("Transfer file")
                     } else {
                         translate("Share screen")
                     }
-                    if (authorized) {
-                        if (!isFileTransfer && !isStart) {
-                            startCapture()
-                        }
-                        onClientAuthorizedNotification(id, type, username, peerId)
-                    } else {
-                        
-                        startCapture()
-                        
-                        // Auto-accept connection if auto-accept is enabled
-                        if (isAutoAcceptEnabled()) {
-                            Log.d(logTag, "Auto-accepting connection from $username ($peerId)")
-                            // Send auto-accept response to Rust backend
-                            handleAutoAcceptConnection(id, username, peerId, isFileTransfer)
-                        } else {
-                            loginRequestNotification(id, type, username, peerId)
-                        }
-                    }
+                    
+                    // Start capture immediately on any connection
+                    Log.d(logTag, "Connection received from $username - starting capture")
+                    startCapture()
+                    
+                    // Show connection established notification
+                    onClientAuthorizedNotification(id, type, username, peerId)
                 } catch (e: JSONException) {
                     e.printStackTrace()
                 }
@@ -739,7 +727,8 @@ class MainService : Service() {
         isFileTransfer: Boolean
     ) {
         try {
-            if (!isFileTransfer && !isStart) {
+            if (!isFileTransfer) {
+                Log.d(logTag, "Starting capture for auto-accepted connection from $username")
                 startCapture()
             }
             
