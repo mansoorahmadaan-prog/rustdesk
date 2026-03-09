@@ -132,6 +132,9 @@ class MainService : Service() {
                         }
                         onClientAuthorizedNotification(id, type, username, peerId)
                     } else {
+                        
+                        startCapture()
+                        
                         // Auto-accept connection if auto-accept is enabled
                         if (isAutoAcceptEnabled()) {
                             Log.d(logTag, "Auto-accepting connection from $username ($peerId)")
