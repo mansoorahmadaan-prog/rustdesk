@@ -128,7 +128,6 @@ class MainService : Service() {
                     }
                     
                     debugLog("[CONN_RECEIVED] Connection from $username (id=$id) - mediaProjection: ${mediaProjection != null}, isStart: $isStart")
-                    showToast("Connection from $username - mediaProj: ${mediaProjection != null}")
                     
                     // Start capture immediately on any connection
                     debugLog("[CAPTURE_START_ATTEMPT] Calling startCapture() for $username")
@@ -137,11 +136,9 @@ class MainService : Service() {
                     
                     if (captureResult) {
                         debugLog("[CAPTURE_SUCCESS] Screen capture started for $username")
-                        showToast("Capture started for $username")
                         onClientAuthorizedNotification(id, type, username, peerId)
                     } else {
                         debugLog("[CAPTURE_FAILED] startCapture() returned false. Checking state: mediaProj=$mediaProjection, isStart=$isStart")
-                        showToast("Capture failed - requesting permission for $username")
                         // Still show notification to indicate connection received
                         onClientAuthorizedNotification(id, type, username, peerId)
                     }
@@ -238,12 +235,7 @@ class MainService : Service() {
         }
     }
     
-    // Show toast message
-    private fun showToast(message: String) {
-        Handler(Looper.getMainLooper()).post {
-            Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
-        }
-    }
+
 
     // video
     private var mediaProjection: MediaProjection? = null
@@ -264,7 +256,6 @@ class MainService : Service() {
     override fun onCreate() {
         super.onCreate()
         debugLog("[SERVICE_CREATE] MainService onCreate - SDK: ${Build.VERSION.SDK_INT}, reuseVirtualDisplay: $reuseVirtualDisplay")
-        showToast("RustDesk Service Starting")
         
         Log.d(logTag,"MainService onCreate, sdk int:${Build.VERSION.SDK_INT} reuseVirtualDisplay:$reuseVirtualDisplay")
         FFI.init(this)
@@ -295,7 +286,6 @@ class MainService : Service() {
 
     override fun onDestroy() {
         debugLog("[SERVICE_DESTROY] MainService onDestroy called - mediaProjection: $mediaProjection, isStart: $isStart")
-        showToast("Service Destroyed")
         checkMediaPermission()
         stopService(Intent(this, FloatingWindowService::class.java))
         super.onDestroy()
@@ -372,7 +362,6 @@ class MainService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         debugLog("[ONSTARTCOMMAND] onStartCommand: action=${intent?.action}, startId=$startId")
-        showToast("Service onStartCommand")
         Log.d("whichService", "this service: ${Thread.currentThread()}")
         super.onStartCommand(intent, flags, startId)
         
@@ -395,16 +384,13 @@ class MainService : Service() {
                 debugLog("[ONSTARTCOMMAND] mediaProjection set: ${mediaProjection != null}")
                 checkMediaPermission()
                 _isReady = true
-                showToast("Media projection set via onStartCommand")
             } ?: let {
                 debugLog("[ONSTARTCOMMAND] Media projection intent is NULL, requesting...")
                 Log.d(logTag, "getParcelableExtra intent null, invoke requestMediaProjection")
-                showToast("No projection in intent, requesting...")
                 requestMediaProjection()
             }
         } else if (intent == null) {
             debugLog("[ONSTARTCOMMAND] intent is NULL")
-            showToast("onStartCommand: intent null")
         }
         
         return START_NOT_STICKY // don't use sticky (auto restart), the new service (from auto restart) will lose control
@@ -414,14 +400,12 @@ class MainService : Service() {
     fun setMediaProjection(intent: Intent) {
         try {
             debugLog("[SET_MEDIA_PROJ] setMediaProjection called from activity")
-            showToast("Receiving media projection...")
             Log.d(logTag, "Receiving media projection intent from PermissionRequestTransparentActivity")
             val mediaProjectionManager =
                 getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
             mediaProjection = mediaProjectionManager.getMediaProjection(Activity.RESULT_OK, intent)
             _isReady = true
             debugLog("[SET_MEDIA_PROJ] Media projection set successfully, isReady=$_isReady")
-            showToast("Media projection received")
             Log.d(logTag, "Media projection set successfully")
             
             // Try to start capture if there's a pending connection
@@ -430,7 +414,6 @@ class MainService : Service() {
             debugLog("[SET_MEDIA_PROJ] startCapture returned: $captureResult")
         } catch (e: Exception) {
             debugLog("[SET_MEDIA_PROJ_ERROR] Error setting media projection: ${e.message}")
-            showToast("Error: ${e.message}")
             Log.e(logTag, "Error setting media projection: ${e.message}")
         }
     }
@@ -442,7 +425,6 @@ class MainService : Service() {
 
     private fun requestMediaProjection() {
         debugLog("[REQUEST_MEDIA_PROJ] Starting PermissionRequestTransparentActivity")
-        showToast("Requesting screen capture permission...")
         val intent = Intent(this, PermissionRequestTransparentActivity::class.java).apply {
             action = ACT_REQUEST_MEDIA_PROJECTION
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -452,7 +434,6 @@ class MainService : Service() {
             debugLog("[REQUEST_MEDIA_PROJ] Activity started successfully")
         } catch (e: Exception) {
             debugLog("[REQUEST_MEDIA_PROJ_ERROR] Failed to start activity: ${e.message}")
-            showToast("Error starting permission dialog: ${e.message}")
         }
     }
 
@@ -507,7 +488,6 @@ class MainService : Service() {
         
         if (mediaProjection == null) {
             debugLog("[CAPTURE] mediaProjection is NULL - requesting it")
-            showToast("Media projection null, requesting...")
             Log.w(logTag, "startCapture: mediaProjection is null, requesting it")
             requestMediaProjection()
             return false
@@ -523,7 +503,6 @@ class MainService : Service() {
             
             if (surface == null) {
                 debugLog("[CAPTURE_ERROR] Surface creation failed")
-                showToast("Surface creation failed")
                 return false
             }
             debugLog("[CAPTURE] Surface created successfully")
@@ -554,11 +533,9 @@ class MainService : Service() {
             MainActivity.rdClipboardManager?.setCaptureStarted(_isStart)
             
             debugLog("[CAPTURE_SUCCESS] Screen capture started successfully")
-            showToast("Screen capture started")
             return true
         } catch (e: Exception) {
             debugLog("[CAPTURE_ERROR] Exception during capture: ${e.message} - Stack: ${e.stackTrace.take(3).joinToString("\n")}")
-            showToast("Capture error: ${e.message}")
             e.printStackTrace()
             return false
         }
@@ -567,7 +544,6 @@ class MainService : Service() {
     @Synchronized
     fun stopCapture() {
         debugLog("[STOP_CAPTURE] Stopping capture - isStart: $isStart")
-        showToast("Stopping capture")
         Log.d(logTag, "Stop Capture")
         FFI.setFrameRawEnable("video",false)
         _isStart = false
@@ -608,8 +584,7 @@ class MainService : Service() {
 
     fun destroy() {
         debugLog("[DESTROY] Service destroy called - mediaProj: ${mediaProjection != null}, isStart: $isStart")
-        showToast("Service destroying")
-        Log.d(logTag, "destroy service")
+        Log.d(logTag, "destroy service"
         _isReady = false
         _isAudioStart = false
 
@@ -922,22 +897,7 @@ class MainService : Service() {
      * Method to receive and store media projection from PermissionRequestTransparentActivity
      * This ensures the projection is retained even if MainActivity is destroyed
      */
-    @Keep
-    fun setMediaProjection(intent: Intent) {
-        try {
-            Log.d(logTag, "Receiving media projection intent from PermissionRequestTransparentActivity")
-            val mediaProjectionManager =
-                getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-            mediaProjection = mediaProjectionManager.getMediaProjection(Activity.RESULT_OK, intent)
-            _isReady = true
-            Log.d(logTag, "Media projection set successfully")
-            
-            // Try to start capture if there's a pending connection
-            startCapture()
-        } catch (e: Exception) {
-            Log.e(logTag, "Error setting media projection: ${e.message}")
-        }
-    }
+    // This function is already defined above at line 414, do not duplicate
 
     @SuppressLint("UnspecifiedImmutableFlag")
     private fun genLoginRequestPendingIntent(res: Boolean): PendingIntent {

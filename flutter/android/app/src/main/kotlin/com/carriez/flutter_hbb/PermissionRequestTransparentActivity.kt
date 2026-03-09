@@ -17,9 +17,85 @@ class PermissionRequestTransparentActivity: Activity() {
     private val logTag = "permissionRequest"
     private var mainService: MainService? = null
     private var mediaProjectionResultIntent: Intent? = null
-    
-    // Debug logging helper
-    private fun debugLog(message: String) {\n        val timestamp = java.text.SimpleDateFormat(\"HH:mm:ss.SSS\", java.util.Locale.US).format(java.util.Date())\n        val fullMsg = \"[$timestamp] PERM_ACTIVITY: $message\"\n        Log.d(logTag, fullMsg)\n        try {\n            val debugFile = java.io.File(getExternalFilesDir(null), \"rustdesk_debug.log\")\n            debugFile.appendText(\"$fullMsg\\n\", Charsets.UTF_8)\n        } catch (e: Exception) {\n            Log.e(logTag, \"Failed to write debug log: ${e.message}\")\n        }\n    }\n    \n    // Show toast message\n    private fun showToast(message: String) {\n        Handler(Looper.getMainLooper()).post {\n            Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()\n        }\n    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)\n        val actionStr = intent?.action ?: \"NULL\"\n        debugLog(\"onCreate - action: $actionStr\")\n        showToast(\"Permission Activity Started\")\n        Log.d(logTag, \"onCreate PermissionRequestTransparentActivity: intent.action: ${intent.action}\")\n\n        when (intent.action) {\n            ACT_REQUEST_MEDIA_PROJECTION -> {\n                debugLog(\"Showing screen capture permission dialog\")\n                showToast(\"Requesting permission...\")\n                val mediaProjectionManager =\n                    getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager\n                val intent = mediaProjectionManager.createScreenCaptureIntent()\n                debugLog(\"Starting activity for result\")\n                startActivityForResult(intent, REQ_REQUEST_MEDIA_PROJECTION)\n            }\n            else -> {\n                debugLog(\"Unknown action: ${intent?.action}\")\n                showToast(\"Unknown permission request\")\n                finish()\n            }\n        }\n    }\n\n    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {\n        super.onActivityResult(requestCode, resultCode, data)\n        debugLog(\"onActivityResult - requestCode=$requestCode, resultCode=$resultCode, data=${data != null}\")\n        showToast(\"Permission result: code=$resultCode\")\n        \n        if (requestCode == REQ_REQUEST_MEDIA_PROJECTION) {\n            if (resultCode == RESULT_OK && data != null) {\n                debugLog(\"User approved screen capture permission\")\n                showToast(\"Permission approved!\")\n                mediaProjectionResultIntent = data\n                launchService(data)\n            } else {\n                debugLog(\"User denied or error - resultCode: $resultCode, data: ${data != null}\")\n                showToast(\"Permission denied or error\")\n                setResult(RES_FAILED)\n                finish()\n            }\n        }\n    }\n\n    private fun launchService(mediaProjectionResult: Intent) {\n        debugLog(\"launchService called - preparing to bind/start service\")\n        showToast(\"Connecting to service...\")\n        Log.d(logTag, \"Launch/Update MainService with media projection\")\n        val serviceIntent = Intent(this, MainService::class.java)\n        serviceIntent.action = ACT_INIT_MEDIA_PROJECTION_AND_SERVICE\n        serviceIntent.putExtra(EXT_MEDIA_PROJECTION_RES_INTENT, mediaProjectionResult)\n\n        // First, try to bind to existing service if it's running\n        debugLog(\"Attempting to bind to service...\")\n        try {\n            bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE)\n            debugLog(\"bindService called successfully\")\n        } catch (e: Exception) {\n            debugLog(\"bindService failed: ${e.message}\")\n            showToast(\"Bind failed: ${e.message}\")\n        }\n\n        // Also start/update the service\n        debugLog(\"Starting service...\")\n        try {\n            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {\n                startForegroundService(serviceIntent)\n                debugLog(\"startForegroundService called\")\n            } else {\n                startService(serviceIntent)\n                debugLog(\"startService called\")\n            }\n            showToast(\"Service started\")\n        } catch (e: Exception) {\n            debugLog(\"startService failed: ${e.message}\")\n            showToast(\"Start service failed: ${e.message}\")\n        }\n    }\n\n    private val serviceConnection = object : ServiceConnection {\n        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {\n            debugLog(\"onServiceConnected - service available\")\n            showToast(\"Service connected!\")\n            Log.d(logTag, \"Connected to MainService, sending media projection\")\n            try {\n                val binder = service as MainService.LocalBinder\n                mainService = binder.getService()\n                debugLog(\"Got service instance from binder\")\n                \n                // Send the media projection to the running service\n                mediaProjectionResultIntent?.let {\n                    debugLog(\"Calling setMediaProjection on service...\")\n                    showToast(\"Sending projection to service...\")\n                    Log.d(logTag, \"Sending media projection through service binding\")\n                    mainService?.setMediaProjection(it)\n                    debugLog(\"setMediaProjection call completed\")\n                    showToast(\"Projection sent!\")\n                } ?: run {\n                    debugLog(\"mediaProjectionResultIntent is NULL!\")\n                    showToast(\"ERROR: No projection intent!\")\n                }\n            } catch (e: Exception) {\n                debugLog(\"Error in onServiceConnected: ${e.message}\")\n                showToast(\"Connection error: ${e.message}\")\n                Log.e(logTag, \"Error sending media projection to service: ${e.message}\")\n                e.printStackTrace()\n            } finally {\n                try {\n                    unbindService(this)\n                    debugLog(\"Service unbound\")\n                } catch (e: Exception) {\n                    debugLog(\"Error unbinding: ${e.message}\")\n                }\n                finish()\n            }\n        }\n\n        override fun onServiceDisconnected(name: ComponentName?) {\n            debugLog(\"onServiceDisconnected\")\n            showToast(\"Service disconnected\")\n            Log.d(logTag, \"Disconnected from MainService\")\n            mainService = null\n        }\n    }\n\n    override fun onDestroy() {\n        debugLog(\"onDestroy\")\n        try {\n            unbindService(serviceConnection)\n            debugLog(\"Unbound in onDestroy\")\n        } catch (e: Exception) {\n            debugLog(\"Error unbinding in onDestroy: ${e.message}\")\n            Log.d(logTag, \"Error unbinding service: ${e.message}\")\n        }\n        super.onDestroy()\n    }\n\n}
+        super.onCreate(savedInstanceState)
+        Log.d(logTag, "onCreate PermissionRequestTransparentActivity: intent.action: ${intent.action}")
+
+        when (intent.action) {
+            ACT_REQUEST_MEDIA_PROJECTION -> {
+                val mediaProjectionManager =
+                    getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+                val intent = mediaProjectionManager.createScreenCaptureIntent()
+                startActivityForResult(intent, REQ_REQUEST_MEDIA_PROJECTION)
+            }
+            else -> finish()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQ_REQUEST_MEDIA_PROJECTION) {
+            if (resultCode == RESULT_OK && data != null) {
+                mediaProjectionResultIntent = data
+                launchService(data)
+            } else {
+                setResult(RES_FAILED)
+                finish()
+            }
+        }
+    }
+
+    private fun launchService(mediaProjectionResult: Intent) {
+        Log.d(logTag, "Launch/Update MainService with media projection")
+        val serviceIntent = Intent(this, MainService::class.java)
+        serviceIntent.action = ACT_INIT_MEDIA_PROJECTION_AND_SERVICE
+        serviceIntent.putExtra(EXT_MEDIA_PROJECTION_RES_INTENT, mediaProjectionResult)
+
+        // First, try to bind to existing service if it's running
+        bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE)
+
+        // Also start/update the service
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
+    }
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            Log.d(logTag, "Connected to MainService, sending media projection")
+            try {
+                val binder = service as MainService.LocalBinder
+                mainService = binder.getService()
+                
+                // Send the media projection to the running service
+                mediaProjectionResultIntent?.let {
+                    Log.d(logTag, "Sending media projection through service binding")
+                    mainService?.setMediaProjection(it)
+                }
+            } catch (e: Exception) {
+                Log.e(logTag, "Error sending media projection to service: ${e.message}")
+            } finally {
+                unbindService(this)
+                finish()
+            }
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            Log.d(logTag, "Disconnected from MainService")
+            mainService = null
+        }
+    }
+
+    override fun onDestroy() {
+        try {
+            unbindService(serviceConnection)
+        } catch (e: Exception) {
+            Log.d(logTag, "Error unbinding service: ${e.message}")
+        }
+        super.onDestroy()
+    }
+
+}
