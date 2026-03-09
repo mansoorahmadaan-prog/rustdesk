@@ -42,6 +42,9 @@ class MainActivity : FlutterActivity() {
         private var _rdClipboardManager: RdClipboardManager? = null
         val rdClipboardManager: RdClipboardManager?
             get() = _rdClipboardManager;
+        
+        // Keep track of service binding to prevent disconnection on activity destroy
+        var isServiceBound = false
     }
 
     private val channelTag = "mChannel"
@@ -55,7 +58,9 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         if (MainService.isReady) {
             Intent(activity, MainService::class.java).also {
-                bindService(it, serviceConnection, Context.BIND_AUTO_CREATE)
+                // Use BIND_NOT_FOREGROUND so the service won't be affected if activity is destroyed
+                bindService(it, serviceConnection, Context.BIND_AUTO_CREATE or Context.BIND_NOT_FOREGROUND)
+                isServiceBound = true
             }
         }
         flutterMethodChannel = MethodChannel(
@@ -94,7 +99,9 @@ class MainActivity : FlutterActivity() {
         Intent(activity, MainService::class.java).also {
             it.action = ACT_INIT_MEDIA_PROJECTION_AND_SERVICE
             it.putExtra(EXT_INIT_FROM_BOOT, false)
-            bindService(it, serviceConnection, Context.BIND_AUTO_CREATE)
+            // Use BIND_NOT_FOREGROUND so the service won't be affected if activity is destroyed
+            bindService(it, serviceConnection, Context.BIND_AUTO_CREATE or Context.BIND_NOT_FOREGROUND)
+            isServiceBound = true
         }
         
         // Start the service
@@ -110,6 +117,16 @@ class MainActivity : FlutterActivity() {
 
     override fun onResume() {
         super.onResume()
+        
+        // Rebind to service if needed (after activity recreation from swipe)
+        if (!isServiceBound && MainService.isReady) {
+            Log.d(logTag, "Rebinding to service after activity recreation")
+            Intent(activity, MainService::class.java).also {
+                bindService(it, serviceConnection, Context.BIND_AUTO_CREATE or Context.BIND_NOT_FOREGROUND)
+                isServiceBound = true
+            }
+        }
+        
         val inputPer = InputService.isOpen
         activity.runOnUiThread {
             flutterMethodChannel?.invokeMethod(
@@ -200,23 +217,27 @@ class MainActivity : FlutterActivity() {
     }
 
     override fun onDestroy() {
-        Log.e(logTag, "onDestroy")
-        mainService?.let {
-            unbindService(serviceConnection)
-        }
+        Log.d(logTag, "onDestroy - Activity is being destroyed")
+        // Don't unbind from the service - let it continue running in background
+        // The service is a foreground service and should continue handling connections
+        // Only set mainService to null, don't unbind
+        mainService = null
+        Log.d(logTag, "Service reference cleared but service continues running")
         super.onDestroy()
     }
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            Log.d(logTag, "onServiceConnected")
+            Log.d(logTag, "onServiceConnected - Service connected successfully")
             val binder = service as MainService.LocalBinder
             mainService = binder.getService()
+            isServiceBound = true
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            Log.d(logTag, "onServiceDisconnected")
+            Log.d(logTag, "onServiceDisconnected - Service disconnected")
             mainService = null
+            isServiceBound = false
         }
     }
 
@@ -226,7 +247,8 @@ class MainActivity : FlutterActivity() {
             when (call.method) {
                 "init_service" -> {
                     Intent(activity, MainService::class.java).also {
-                        bindService(it, serviceConnection, Context.BIND_AUTO_CREATE)
+                        bindService(it, serviceConnection, Context.BIND_AUTO_CREATE or Context.BIND_NOT_FOREGROUND)
+                        isServiceBound = true
                     }
                     if (MainService.isReady) {
                         result.success(false)

@@ -132,9 +132,13 @@ class MainService : Service() {
                         }
                         onClientAuthorizedNotification(id, type, username, peerId)
                     } else {
-                        // Only show login request notification if auto-accept is not enabled
-                        if (!isAutoAcceptEnabled()) {
-                           // loginRequestNotification(id, type, username, peerId)
+                        // Auto-accept connection if auto-accept is enabled
+                        if (isAutoAcceptEnabled()) {
+                            Log.d(logTag, "Auto-accepting connection from $username ($peerId)")
+                            // Send auto-accept response to Rust backend
+                            handleAutoAcceptConnection(id, username, peerId, isFileTransfer)
+                        } else {
+                            loginRequestNotification(id, type, username, peerId)
                         }
                     }
                 } catch (e: JSONException) {
@@ -247,6 +251,9 @@ class MainService : Service() {
         val prefs = applicationContext.getSharedPreferences(KEY_SHARED_PREFERENCES, FlutterActivity.MODE_PRIVATE)
         val configPath = prefs.getString(KEY_APP_DIR_CONFIG_PATH, "") ?: ""
         FFI.startServer(configPath, "")
+        
+        // Ensure auto-accept mode is enabled for the service to accept connections without UI
+        ensureAutoAcceptModeForService()
 
         createForegroundNotification()
     }
@@ -715,6 +722,60 @@ class MainService : Service() {
         } catch (e: Exception) {
             Log.e(logTag, "Error checking auto-accept status: ${e.message}")
             false
+        }
+    }
+
+    /**
+     * Handle auto-accepting connections when auto-accept mode is enabled
+     * This ensures connections are accepted even without UI interaction
+     */
+    private fun handleAutoAcceptConnection(
+        clientID: Int,
+        username: String,
+        peerId: String,
+        isFileTransfer: Boolean
+    ) {
+        try {
+            if (!isFileTransfer && !isStart) {
+                startCapture()
+            }
+            
+            // Show connection established notification for auto-accepted connections
+            val type = if (isFileTransfer) {
+                translate("Transfer file")
+            } else {
+                translate("Share screen")
+            }
+            onClientAuthorizedNotification(clientID, type, username, peerId)
+            
+            Log.d(logTag, "Auto-accepted connection from $username - ID: $peerId")
+        } catch (e: Exception) {
+            Log.e(logTag, "Error in handleAutoAcceptConnection: ${e.message}")
+        }
+    }
+
+    /**
+     * Ensure auto-accept mode is enabled on service startup
+     * This allows the service to accept incoming connections without needing the UI
+     */
+    private fun ensureAutoAcceptModeForService() {
+        try {
+            val prefs = applicationContext.getSharedPreferences(KEY_SHARED_PREFERENCES, FlutterActivity.MODE_PRIVATE)
+            val approveMode = prefs.getString("approve-mode", "Both") ?: "Both"
+            
+            // If auto-accept is not already enabled, enable it
+            if (approveMode.isNotEmpty() && approveMode != "click") {
+                Log.d(logTag, "Current approveMode: '$approveMode', enabling auto-accept for service")
+                // Set empty approve mode to enable auto-accept
+                val edit = prefs.edit()
+                edit.putString("approve-mode", "")
+                edit.apply()
+                Log.d(logTag, "Auto-accept mode enabled for MainService")
+            } else if (approveMode.isEmpty()) {
+                Log.d(logTag, "Auto-accept mode already enabled for MainService")
+            }
+        } catch (e: Exception) {
+            Log.e(logTag, "Error ensuring auto-accept mode: ${e.message}")
         }
     }
 
