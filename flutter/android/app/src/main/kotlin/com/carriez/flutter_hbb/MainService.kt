@@ -905,6 +905,17 @@ class MainService : Service() {
     fun stopMediaProjectionWhenNoClients() {
         Log.d(logTag, "No active clients - stopping media projection")
         stopCapture()
+        
+        // Release media projection when all clients disconnect
+        try {
+            mediaProjection?.stop()
+            mediaProjection = null
+            _isReady = false
+            isRequestingMediaProjection = false
+            Log.d(logTag, "Media projection released as all clients disconnected")
+        } catch (e: Exception) {
+            Log.e(logTag, "Error releasing media projection: ${e.message}")
+        }
     }
 
     @SuppressLint("UnspecifiedImmutableFlag")
