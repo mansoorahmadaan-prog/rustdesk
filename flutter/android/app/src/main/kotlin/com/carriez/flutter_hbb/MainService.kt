@@ -128,7 +128,14 @@ class MainService : Service() {
                     
                     Log.d(logTag, "Connection received from $username - mediaProjection ready: ${mediaProjection != null}")
                     
-                    // Start capture immediately on any connection
+                    // Request media projection if not available (standalone, without MainActivity)
+                    if (mediaProjection == null && !_isReady) {
+                        Log.d(logTag, "Media projection not ready - requesting it for client connection")
+                        // Request media projection for this connection
+                        requestMediaProjection()
+                    }
+                    
+                    // Start capture immediately on any connection (will retry if media projection not ready yet)
                     if (startCapture()) {
                         Log.d(logTag, "Capture started successfully for $username")
                         // Show connection established notification
@@ -177,8 +184,10 @@ class MainService : Service() {
                 }
             }
             "stop_capture" -> {
-                Log.d(logTag, "from rust:stop_capture")
+                Log.d(logTag, "from rust:stop_capture - stopping media projection for disconnected clients")
                 stopCapture()
+                // Note: We keep mediaProjection alive for potential reconnections
+                // Only release if service is being destroyed
             }
             "half_scale" -> {
                 val halfScale = arg1.toBoolean()
@@ -500,6 +509,8 @@ class MainService : Service() {
             virtualDisplay = null
         }
 
+        // Release media projection when service is destroyed
+        mediaProjection?.stop()
         mediaProjection = null
         checkMediaPermission()
         stopForeground(true)
