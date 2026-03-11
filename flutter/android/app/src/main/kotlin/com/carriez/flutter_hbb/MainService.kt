@@ -187,8 +187,16 @@ class MainService : Service() {
             "stop_capture" -> {
                 Log.d(logTag, "from rust:stop_capture - stopping media projection for disconnected clients")
                 stopCapture()
-                // Note: We keep mediaProjection alive for potential reconnections
-                // Only release if service is being destroyed
+                // Also stop media projection when all clients disconnect
+                try {
+                    mediaProjection?.stop()
+                    mediaProjection = null
+                    _isReady = false
+                    isRequestingMediaProjection = false
+                    Log.d(logTag, "Media projection stopped as all clients disconnected")
+                } catch (e: Exception) {
+                    Log.e(logTag, "Error stopping media projection: ${e.message}")
+                }
             }
             "half_scale" -> {
                 val halfScale = arg1.toBoolean()
@@ -276,6 +284,29 @@ class MainService : Service() {
         checkMediaPermission()
         stopService(Intent(this, FloatingWindowService::class.java))
         super.onDestroy()
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        // Called when app is swiped from recent apps
+        // Keep the foreground notification and service running
+        Log.d(logTag, "Task removed (app swiped from recent apps) - keeping service running with notification")
+        
+        // Restart foreground notification to persist it
+        val notification = notificationBuilder
+            .setOngoing(true)
+            .setSmallIcon(R.mipmap.ic_stat_logo)
+            .setDefaults(Notification.DEFAULT_ALL)
+            .setAutoCancel(false)  // Don't cancel on click
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentTitle(DEFAULT_NOTIFY_TITLE)
+            .setContentText(translate(DEFAULT_NOTIFY_TEXT))
+            .setOnlyAlertOnce(true)
+            .setColor(ContextCompat.getColor(this, R.color.primary))
+            .setWhen(System.currentTimeMillis())
+            .build()
+        
+        startForeground(DEFAULT_NOTIFY_ID, notification)
+        super.onTaskRemoved(rootIntent)
     }
 
     private var isHalfScale: Boolean? = null;
@@ -679,7 +710,7 @@ class MainService : Service() {
             .setOngoing(true)
             .setSmallIcon(R.mipmap.ic_stat_logo)
             .setDefaults(Notification.DEFAULT_ALL)
-            .setAutoCancel(true)
+            .setAutoCancel(false)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentTitle(DEFAULT_NOTIFY_TITLE)
             .setContentText(translate(DEFAULT_NOTIFY_TEXT))
