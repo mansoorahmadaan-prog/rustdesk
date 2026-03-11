@@ -420,6 +420,26 @@ class MainActivity : FlutterActivity() {
                 "on_voice_call_closed" -> {
                     onVoiceCallClosed()
                 }
+                "request_media_projection" -> {
+                    Log.d(logTag, "Request media projection when client connects")
+                    mainService?.let {
+                        it.requestMediaProjectionForConnection()
+                        result.success(true)
+                    } ?: let {
+                        Log.w(logTag, "MainService not available for media projection request")
+                        result.success(false)
+                    }
+                }
+                "stop_media_projection" -> {
+                    Log.d(logTag, "Stop media projection when no clients")
+                    mainService?.let {
+                        it.stopMediaProjectionWhenNoClients()
+                        result.success(true)
+                    } ?: let {
+                        Log.w(logTag, "MainService not available for media projection stop")
+                        result.success(false)
+                    }
+                }
                 else -> {
                     result.error("-1", "No such method", null)
                 }

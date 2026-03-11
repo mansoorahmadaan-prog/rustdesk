@@ -355,8 +355,8 @@ class MainService : Service() {
                 checkMediaPermission()
                 _isReady = true
             } ?: let {
-                Log.d(logTag, "getParcelableExtra intent null, invoke requestMediaProjection")
-                requestMediaProjection()
+                Log.d(logTag, "Media projection intent not available - will request only when client connects")
+                // Don't request media projection on startup - wait for client connection
             }
         }
         return START_NOT_STICKY // don't use sticky (auto restart), the new service (from auto restart) will lose control
@@ -815,6 +815,31 @@ class MainService : Service() {
         } catch (e: Exception) {
             Log.e(logTag, "Error setting media projection: ${e.message}")
         }
+    }
+
+    /**
+     * Request media projection when a client connects
+     * Called from Dart when a new client connection is established
+     */
+    @Keep
+    fun requestMediaProjectionForConnection() {
+        Log.d(logTag, "Client connected - requesting media projection")
+        if (mediaProjection == null) {
+            requestMediaProjection()
+        } else {
+            Log.d(logTag, "Media projection already available")
+            startCapture()
+        }
+    }
+
+    /**
+     * Stop media projection when no clients are connected
+     * Called from Dart when all clients disconnect
+     */
+    @Keep
+    fun stopMediaProjectionWhenNoClients() {
+        Log.d(logTag, "No active clients - stopping media projection")
+        stopCapture()
     }
 
     @SuppressLint("UnspecifiedImmutableFlag")

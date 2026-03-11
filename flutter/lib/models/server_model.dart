@@ -681,6 +681,8 @@ class ServerModel with ChangeNotifier {
   void addConnection(Map<String, dynamic> evt) {
     try {
       final client = Client.fromJson(jsonDecode(evt["client"]));
+      final wasEmpty = _clients.isEmpty;
+      
       if (client.authorized) {
         parent.target?.dialogManager.dismissByTag(getLoginDialogTag(client.id));
         final index = _clients.indexWhere((c) => c.id == client.id);
@@ -695,6 +697,16 @@ class ServerModel with ChangeNotifier {
         }
         _clients.add(client);
       }
+      
+      // Request media projection when first client connects (Android only)
+      if (isAndroid && wasEmpty && _clients.isNotEmpty) {
+        try {
+          parent.target?.invokeMethod("request_media_projection");
+        } catch (e) {
+          Log.e(logTag, "Failed to request media projection: $e");
+        }
+      }
+      
       _addTab(client);
       // remove disconnected
       final index_disconnected = _clients
@@ -867,6 +879,16 @@ class ServerModel with ChangeNotifier {
         parent.target?.dialogManager.dismissByTag(getLoginDialogTag(id));
         parent.target?.invokeMethod("cancel_notification", id);
       }
+      
+      // Stop media projection when last client disconnects (Android only)
+      if (isAndroid && _clients.isEmpty) {
+        try {
+          parent.target?.invokeMethod("stop_media_projection");
+        } catch (e) {
+          Log.e(logTag, "Failed to stop media projection: $e");
+        }
+      }
+      
       if (desktopType == DesktopType.cm && _clients.isEmpty) {
         hideCmWindow();
       }
@@ -882,6 +904,16 @@ class ServerModel with ChangeNotifier {
         _clients.map((client) => bind.cmCloseConnection(connId: client.id)));
     _clients.clear();
     tabController.state.value.tabs.clear();
+    
+    // Stop media projection when all clients are closed (Android only)
+    if (isAndroid) {
+      try {
+        parent.target?.invokeMethod("stop_media_projection");
+      } catch (e) {
+        Log.e(logTag, "Failed to stop media projection: $e");
+      }
+    }
+    
     if (isAndroid) androidUpdatekeepScreenOn();
   }
 
