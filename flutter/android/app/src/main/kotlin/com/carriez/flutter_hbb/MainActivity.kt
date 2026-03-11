@@ -254,7 +254,7 @@ class MainActivity : FlutterActivity() {
                         result.success(false)
                         return@setMethodCallHandler
                     }
-                    requestMediaProjection()
+                    // Don't request media projection here - let it be deferred until client connection
                     result.success(true)
                 }
                 "start_capture" -> {
