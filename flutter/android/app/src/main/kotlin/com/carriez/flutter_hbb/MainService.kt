@@ -133,17 +133,18 @@ class MainService : Service() {
                         Log.d(logTag, "Media projection not ready - requesting it for client connection")
                         // Request media projection for this connection
                         requestMediaProjection()
-                    }
-                    
-                    // Start capture immediately on any connection (will retry if media projection not ready yet)
-                    if (startCapture()) {
-                        Log.d(logTag, "Capture started successfully for $username")
-                        // Show connection established notification
+                        // Don't call startCapture yet - let it be called in setMediaProjection() after permission is granted
+                        Log.d(logTag, "Waiting for media projection permission before starting capture")
                         onClientAuthorizedNotification(id, type, username, peerId)
-                    } else {
-                        Log.d(logTag, "Capture failed, likely waiting for media projection approval")
-                        // Still show notification to indicate connection received
-                        onClientAuthorizedNotification(id, type, username, peerId)
+                    } else if (mediaProjection != null) {
+                        // Media projection already available - start capture immediately
+                        if (startCapture()) {
+                            Log.d(logTag, "Capture started successfully for $username")
+                            onClientAuthorizedNotification(id, type, username, peerId)
+                        } else {
+                            Log.d(logTag, "Capture failed")
+                            onClientAuthorizedNotification(id, type, username, peerId)
+                        }
                     }
                 } catch (e: JSONException) {
                     Log.e(logTag, "Error processing add_connection: ${e.message}")
@@ -228,6 +229,7 @@ class MainService : Service() {
 
     // video
     private var mediaProjection: MediaProjection? = null
+    private var isRequestingMediaProjection = false  // Flag to prevent multiple simultaneous requests
     private var surface: Surface? = null
     private val sendVP9Thread = Executors.newSingleThreadExecutor()
     private var videoEncoder: MediaCodec? = null
@@ -367,6 +369,8 @@ class MainService : Service() {
                 Log.d(logTag, "Media projection intent not available - will request only when client connects")
                 // Don't request media projection on startup - wait for client connection
             }
+        } else if (intent?.action == ACT_MEDIA_PROJECTION_DENIED) {
+            onMediaProjectionPermissionDenied()
         }
         return START_NOT_STICKY // don't use sticky (auto restart), the new service (from auto restart) will lose control
     }
@@ -377,6 +381,13 @@ class MainService : Service() {
     }
 
     private fun requestMediaProjection() {
+        // Prevent multiple simultaneous permission requests
+        if (isRequestingMediaProjection) {
+            Log.d(logTag, "Media projection request already in progress, skipping")
+            return
+        }
+        
+        isRequestingMediaProjection = true
         val intent = Intent(this, PermissionRequestTransparentActivity::class.java).apply {
             action = ACT_REQUEST_MEDIA_PROJECTION
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -819,13 +830,25 @@ class MainService : Service() {
                 getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
             mediaProjection = mediaProjectionManager.getMediaProjection(Activity.RESULT_OK, intent)
             _isReady = true
+            isRequestingMediaProjection = false  // Reset the flag after successful permission
             Log.d(logTag, "Media projection set successfully")
             
             // Try to start capture if there's a pending connection
             startCapture()
         } catch (e: Exception) {
+            isRequestingMediaProjection = false  // Reset flag on error too
             Log.e(logTag, "Error setting media projection: ${e.message}")
         }
+    }
+
+    /**
+     * Called when user denies media projection permission
+     * This resets the flag so we can try again later
+     */
+    @Keep
+    fun onMediaProjectionPermissionDenied() {
+        Log.d(logTag, "Media projection permission denied by user")
+        isRequestingMediaProjection = false
     }
 
     /**

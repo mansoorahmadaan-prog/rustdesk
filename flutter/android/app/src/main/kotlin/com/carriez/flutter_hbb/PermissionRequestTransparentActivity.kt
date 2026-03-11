@@ -37,6 +37,15 @@ class PermissionRequestTransparentActivity: Activity() {
                 mediaProjectionResultIntent = data
                 launchService(data)
             } else {
+                Log.d(logTag, "Media projection permission denied")
+                // Notify the service that permission was denied so it can reset the flag
+                val serviceIntent = Intent(this, MainService::class.java)
+                serviceIntent.action = ACT_MEDIA_PROJECTION_DENIED
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(serviceIntent)
+                } else {
+                    startService(serviceIntent)
+                }
                 setResult(RES_FAILED)
                 finish()
             }
