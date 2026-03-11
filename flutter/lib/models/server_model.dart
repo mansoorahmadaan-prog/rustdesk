@@ -703,7 +703,7 @@ class ServerModel with ChangeNotifier {
         try {
           parent.target?.invokeMethod("request_media_projection");
         } catch (e) {
-          Log.e(logTag, "Failed to request media projection: $e");
+          debugPrint("Failed to request media projection: $e");
         }
       }
       
@@ -885,7 +885,7 @@ class ServerModel with ChangeNotifier {
         try {
           parent.target?.invokeMethod("stop_media_projection");
         } catch (e) {
-          Log.e(logTag, "Failed to stop media projection: $e");
+          debugPrint("Failed to stop media projection: $e");
         }
       }
       
@@ -910,7 +910,7 @@ class ServerModel with ChangeNotifier {
       try {
         parent.target?.invokeMethod("stop_media_projection");
       } catch (e) {
-        Log.e(logTag, "Failed to stop media projection: $e");
+        debugPrint("Failed to stop media projection: $e");
       }
     }
     
