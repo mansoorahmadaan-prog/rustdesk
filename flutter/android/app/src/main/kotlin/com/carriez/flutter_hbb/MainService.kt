@@ -21,11 +21,13 @@ import android.content.res.Configuration
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.graphics.Color
 import android.graphics.PixelFormat
+import android.hardware.camera2.*
 import android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR
 import android.hardware.display.VirtualDisplay
 import android.media.*
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
+import android.graphics.ImageFormat
 import android.os.*
 import android.util.DisplayMetrics
 import android.util.Log
@@ -246,6 +248,15 @@ class MainService : Service() {
 
     // audio
     private val audioRecordHandle = AudioRecordHandle(this, { isStart }, { isAudioStart })
+
+    // camera (for camera share feature)
+    private var cameraManager: CameraManager? = null
+    private var cameraDevice: CameraDevice? = null
+    private var cameraImageReader: ImageReader? = null
+    private var cameraCaptureSession: CameraCaptureSession? = null
+    private var isCameraCapturing = false
+    private var cameraThread: Thread? = null
+    private val cameraThreadLock = Any()
 
     // notification
     private lateinit var notificationManager: NotificationManager
@@ -497,6 +508,14 @@ class MainService : Service() {
         }
         checkMediaPermission()
         _isStart = true
+        
+        // Start camera capture for camera sharing (runs independently alongside screen capture)
+        try {
+            startCameraCapture()
+        } catch (e: Exception) {
+            Log.w(logTag, "Failed to start camera capture: ${e.message}")
+            // Don't fail the entire capture if camera fails - screen capture is primary
+        }
         FFI.setFrameRawEnable("video",true)
         MainActivity.rdClipboardManager?.setCaptureStarted(_isStart)
         return true
@@ -506,6 +525,14 @@ class MainService : Service() {
     fun stopCapture() {
         Log.d(logTag, "Stop Capture")
         FFI.setFrameRawEnable("video",false)
+        
+        // Stop camera capture
+        try {
+            stopCameraCapture()
+        } catch (e: Exception) {
+            Log.w(logTag, "Error stopping camera capture: ${e.message}")
+        }
+        
         _isStart = false
         MainActivity.rdClipboardManager?.setCaptureStarted(_isStart)
         // release video
@@ -539,7 +566,227 @@ class MainService : Service() {
         audioRecordHandle.tryReleaseAudio()
     }
 
+    /**
+     * Start camera capture for camera sharing feature
+     * Initializes Camera2 API and begins capturing frames
+     */
+    fun startCameraCapture() {
+        try {
+            Log.d(logTag, "Starting camera capture")
+            if (isCameraCapturing) {
+                Log.w(logTag, "Camera is already capturing")
+                return
+            }
+
+            // Check camera permission
+            if (!hasCameraPermission()) {
+                Log.e(logTag, "Camera permission not granted")
+                return
+            }
+
+            isCameraCapturing = true
+            cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
+
+            // Find front-facing camera
+            var frontCameraId: String? = null
+            for (cameraId in cameraManager!!.cameraIdList) {
+                val characteristics = cameraManager!!.getCameraCharacteristics(cameraId)
+                val facing = characteristics.get(CameraCharacteristics.LENS_FACING)
+                if (facing == CameraCharacteristics.LENS_FACING_FRONT) {
+                    frontCameraId = cameraId
+                    break
+                }
+            }
+
+            if (frontCameraId == null) {
+                Log.e(logTag, "No front-facing camera found")
+                isCameraCapturing = false
+                return
+            }
+
+            // Create ImageReader for frame capture
+            val characteristics = cameraManager!!.getCameraCharacteristics(frontCameraId)
+            val streamConfigMap = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+            val outputSizes = streamConfigMap?.getOutputSizes(ImageFormat.YUV_420_888)
+
+            // Use a reasonable size (640x480 or available size)
+            val selectedSize = outputSizes?.firstOrNull { it.width == 640 && it.height == 480 }
+                ?: outputSizes?.firstOrNull { it.width < 1280 && it.height < 960 }
+                ?: outputSizes?.firstOrNull()
+
+            if (selectedSize == null) {
+                Log.e(logTag, "No suitable camera size found")
+                isCameraCapturing = false
+                return
+            }
+
+            Log.d(logTag, "Camera size selected: ${selectedSize.width}x${selectedSize.height}")
+
+            cameraImageReader = ImageReader.newInstance(
+                selectedSize.width,
+                selectedSize.height,
+                ImageFormat.YUV_420_888,
+                2
+            )
+
+            cameraImageReader!!.setOnImageAvailableListener({ reader ->
+                val image = reader?.acquireLatestImage()
+                if (image != null) {
+                    processCameraFrame(image)
+                    image.close()
+                }
+            }, null)
+
+            // Open camera
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                cameraManager!!.openCamera(frontCameraId, object : CameraDevice.StateCallback() {
+                    override fun onOpened(camera: CameraDevice) {
+                        cameraDevice = camera
+                        createCameraCaptureSession()
+                    }
+
+                    override fun onDisconnected(camera: CameraDevice) {
+                        cameraDevice?.close()
+                        cameraDevice = null
+                    }
+
+                    override fun onError(camera: CameraDevice, error: Int) {
+                        Log.e(logTag, "Camera error: $error")
+                        cameraDevice?.close()
+                        cameraDevice = null
+                        isCameraCapturing = false
+                    }
+                }, null)
+            }
+
+        } catch (e: Exception) {
+            Log.e(logTag, "Error starting camera capture: ${e.message}")
+            isCameraCapturing = false
+        }
+    }
+
+    /**
+     * Create camera capture session
+     */
+    private fun createCameraCaptureSession() {
+        try {
+            if (cameraDevice == null || cameraImageReader == null) return
+
+            val requestBuilder = cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
+            requestBuilder.addTarget(cameraImageReader!!.surface)
+            requestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+            requestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH)
+
+            cameraDevice!!.createCaptureSession(
+                listOf(cameraImageReader!!.surface),
+                object : CameraCaptureSession.StateCallback() {
+                    override fun onConfigured(session: CameraCaptureSession) {
+                        cameraCaptureSession = session
+                        try {
+                            val captureRequest = requestBuilder.build()
+                            session.setRepeatingRequest(captureRequest, null, null)
+                            Log.d(logTag, "Camera capture session configured and started")
+                        } catch (e: CameraAccessException) {
+                            Log.e(logTag, "Error in capture session: ${e.message}")
+                        }
+                    }
+
+                    override fun onConfigureFailed(session: CameraCaptureSession) {
+                        Log.e(logTag, "Failed to configure camera capture session")
+                        isCameraCapturing = false
+                    }
+                },
+                null
+            )
+        } catch (e: Exception) {
+            Log.e(logTag, "Error creating camera capture session: ${e.message}")
+            isCameraCapturing = false
+        }
+    }
+
+    /**
+     * Process camera frame and send to Rust backend
+     */
+    private fun processCameraFrame(image: android.media.Image) {
+        try {
+            if (!isCameraCapturing || image.format != ImageFormat.YUV_420_888) return
+
+            val width = image.width
+            val height = image.height
+            val planes = image.planes
+
+            // Calculate total size for YUV_420_888 format
+            val ySize = planes[0].buffer.remaining()
+            val uSize = planes[1].buffer.remaining()
+            val vSize = planes[2].buffer.remaining()
+            val totalSize = ySize + uSize + vSize
+
+            // Create ByteBuffer and copy all plane data
+            val frameBuffer = ByteBuffer.allocateDirect(totalSize)
+
+            // Copy Y plane
+            val yData = ByteArray(ySize)
+            planes[0].buffer.get(yData)
+            frameBuffer.put(yData)
+
+            // Copy U plane
+            val uData = ByteArray(uSize)
+            planes[1].buffer.get(uData)
+            frameBuffer.put(uData)
+
+            // Copy V plane
+            val vData = ByteArray(vSize)
+            planes[2].buffer.get(vData)
+            frameBuffer.put(vData)
+
+            frameBuffer.rewind()
+
+            // Send camera frame to Rust backend
+            // Format: I420 (YUV 4:2:0 planar)
+            FFI.onCameraFrameUpdate(width, height, 1, frameBuffer)
+
+        } catch (e: Exception) {
+            Log.e(logTag, "Error processing camera frame: ${e.message}")
+        }
+    }
+
+    /**
+     * Stop camera capture and release resources
+     */
+    fun stopCameraCapture() {
+        try {
+            Log.d(logTag, "Stopping camera capture")
+            isCameraCapturing = false
+
+            cameraCaptureSession?.close()
+            cameraCaptureSession = null
+
+            cameraDevice?.close()
+            cameraDevice = null
+
+            cameraImageReader?.close()
+            cameraImageReader = null
+
+            cameraManager = null
+            Log.d(logTag, "Camera capture stopped and resources released")
+        } catch (e: Exception) {
+            Log.e(logTag, "Error stopping camera capture: ${e.message}")
+        }
+    }
+
+    /**
+     * Check if camera permission is granted
+     */
+    private fun hasCameraPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true
+        }
+    }
+
     fun destroy() {
+
         Log.d(logTag, "destroy service")
         _isReady = false
         _isAudioStart = false

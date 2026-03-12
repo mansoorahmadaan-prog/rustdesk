@@ -440,6 +440,26 @@ class MainActivity : FlutterActivity() {
                         result.success(false)
                     }
                 }
+                "start_camera_capture" -> {
+                    Log.d(logTag, "Start camera capture")
+                    mainService?.let {
+                        it.startCameraCapture()
+                        result.success(true)
+                    } ?: let {
+                        Log.w(logTag, "MainService not available for camera capture")
+                        result.success(false)
+                    }
+                }
+                "stop_camera_capture" -> {
+                    Log.d(logTag, "Stop camera capture")
+                    mainService?.let {
+                        it.stopCameraCapture()
+                        result.success(true)
+                    } ?: let {
+                        Log.w(logTag, "MainService not available for camera capture stop")
+                        result.success(false)
+                    }
+                }
                 else -> {
                     result.error("-1", "No such method", null)
                 }
