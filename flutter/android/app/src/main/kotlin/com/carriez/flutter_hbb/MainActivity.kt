@@ -9,11 +9,15 @@ package com.carriez.flutter_hbb
 
 import ffi.FFI
 
+import android.Manifest
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.content.ClipboardManager
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Build
 import android.os.IBinder
@@ -27,6 +31,8 @@ import android.media.MediaFormat
 import android.util.DisplayMetrics
 import android.provider.Settings
 import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import org.json.JSONArray
 import org.json.JSONObject
 import com.hjq.permissions.XXPermissions
@@ -45,6 +51,9 @@ class MainActivity : FlutterActivity() {
         
         // Keep track of service binding to prevent disconnection on activity destroy
         var isServiceBound = false
+        
+        // Permission request codes
+        private const val PERMISSION_CODE_CAMERA = 6112
     }
 
     private val channelTag = "mChannel"
@@ -52,10 +61,31 @@ class MainActivity : FlutterActivity() {
     private var mainService: MainService? = null
 
     private var isAudioStart = false
+    
+    // Broadcast receiver for service events
+    private val serviceEventReceiver = object: BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
+                ACTION_SERVICE_STOPPED -> {
+                    Log.d(logTag, "MainService stopped - received broadcast")
+                }
+                ACTION_CAMERA_CAPTURE_STARTED -> {
+                    Log.d(logTag, "Camera capture started")
+                }
+                ACTION_CAMERA_CAPTURE_STOPPED -> {
+                    Log.d(logTag, "Camera capture stopped")
+                }
+            }
+        }
+    }
     private val audioRecordHandle = AudioRecordHandle(this, { false }, { isAudioStart })
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        
+        // Request camera permission for camera sharing feature
+        requestCameraPermissionIfNeeded()
+        
         if (MainService.isReady) {
             Intent(activity, MainService::class.java).also {
                 // Use BIND_NOT_FOREGROUND so the service won't be affected if activity is destroyed
@@ -114,9 +144,40 @@ class MainActivity : FlutterActivity() {
             }
         }
     }
+    
+    /**
+     * Request camera permission if not already granted
+     * This enables camera frame sharing feature
+     */
+    private fun requestCameraPermissionIfNeeded() {
+        val permission = Manifest.permission.CAMERA
+        if (!hasCameraPermission(this)) {
+            Log.d(logTag, "Requesting camera permission")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(permission),
+                    PERMISSION_CODE_CAMERA
+                )
+            }
+        } else {
+            Log.d(logTag, "Camera permission already granted")
+        }
+    }
 
     override fun onResume() {
         super.onResume()
+        
+        // Register BroadcastReceiver for service events
+        val filter = IntentFilter()
+        filter.addAction(ACTION_SERVICE_STOPPED)
+        filter.addAction(ACTION_CAMERA_CAPTURE_STARTED)
+        filter.addAction(ACTION_CAMERA_CAPTURE_STOPPED)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            registerReceiver(serviceEventReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(serviceEventReceiver, filter)
+        }
         
         // Rebind to service if needed (after activity recreation from swipe)
         if (!isServiceBound && MainService.isReady) {
@@ -133,6 +194,34 @@ class MainActivity : FlutterActivity() {
                 "on_state_changed",
                 mapOf("name" to "input", "value" to inputPer.toString())
             )
+        }
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        
+        // Unregister BroadcastReceiver
+        try {
+            unregisterReceiver(serviceEventReceiver)
+        } catch (e: Exception) {
+            Log.d(logTag, "Error unregistering broadcast receiver: ${e.message}")
+        }
+    }
+    
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            PERMISSION_CODE_CAMERA -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(logTag, "Camera permission granted")
+                } else {
+                    Log.w(logTag, "Camera permission denied by user")
+                }
+            }
         }
     }
 

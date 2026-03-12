@@ -804,6 +804,11 @@ class MainService : Service() {
         checkMediaPermission()
         stopForeground(true)
         stopService(Intent(this, FloatingWindowService::class.java))
+        
+        // Send broadcast to notify listeners that service is stopped
+        Log.d(logTag, "Sending SERVICE_STOPPED broadcast")
+        sendBroadcast(Intent(ACTION_SERVICE_STOPPED))
+        
         stopSelf()
     }
 
