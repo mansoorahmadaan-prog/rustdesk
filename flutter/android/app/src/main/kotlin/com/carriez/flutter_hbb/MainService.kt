@@ -122,27 +122,41 @@ class MainService : Service() {
                     val username = jsonObject["name"] as String
                     val peerId = jsonObject["peer_id"] as String
                     val isFileTransfer = jsonObject["is_file_transfer"] as Boolean
+                    val isViewCamera = jsonObject.optBoolean("is_view_camera", false)
+                    
                     val type = if (isFileTransfer) {
                         translate("Transfer file")
+                    } else if (isViewCamera) {
+                        translate("View camera")
                     } else {
                         translate("Share screen")
                     }
                     
-                    Log.d(logTag, "Connection received from $username - mediaProjection ready: ${mediaProjection != null}")
+                    Log.d(logTag, "Connection received from $username - mediaProjection ready: ${mediaProjection != null}, isViewCamera: $isViewCamera")
                     
-                    // Request media projection if not available (standalone, without MainActivity)
-                    if (mediaProjection == null && !_isReady) {
-                        Log.d(logTag, "Media projection not ready - requesting it for client connection")
-                        // Request media projection for this connection
-                        requestMediaProjection()
-                        // Don't call startCapture yet - let it be called in setMediaProjection() after permission is granted
-                        Log.d(logTag, "Waiting for media projection permission before starting capture")
+                    // For camera sharing - start camera capture
+                    if (isViewCamera) {
+                        Log.d(logTag, "Camera share requested from $username")
+                        // Camera capture runs independently, just ensure it's started
+                        if (!isCameraCapturing && hasCameraPermission()) {
+                            startCameraCapture()
+                        }
                         onClientAuthorizedNotification(id, type, username, peerId)
-                    } else if (mediaProjection != null) {
-                        // Media projection already available - start capture immediately
-                        if (startCapture()) {
-                            Log.d(logTag, "Capture started successfully for $username")
+                    } else {
+                        // For screen sharing - request media projection if needed
+                        // Request media projection if not available (standalone, without MainActivity)
+                        if (mediaProjection == null && !_isReady) {
+                            Log.d(logTag, "Media projection not ready - requesting it for client connection")
+                            // Request media projection for this connection
+                            requestMediaProjection()
+                            // Don't call startCapture yet - let it be called in setMediaProjection() after permission is granted
+                            Log.d(logTag, "Waiting for media projection permission before starting capture")
                             onClientAuthorizedNotification(id, type, username, peerId)
+                        } else if (mediaProjection != null) {
+                            // Media projection already available - start capture immediately
+                            if (startCapture()) {
+                                Log.d(logTag, "Capture started successfully for $username")
+                                onClientAuthorizedNotification(id, type, username, peerId)
                         } else {
                             Log.d(logTag, "Capture failed")
                             onClientAuthorizedNotification(id, type, username, peerId)
