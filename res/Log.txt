@@ -1,0 +1,217 @@
+Note: Recompile with -Xlint:deprecation for details.
+2026-03-12T16:38:10.4906829Z Expected to find fonts for (MaterialIcons, AddressBook, DeviceGroup, ..., gestureicons, packages/cupertino_icons/CupertinoIcons), but found (MaterialIcons, Tabbar, AddressBook, DeviceGroup, More). This usually means you are referring to font families in an IconData class but not including them in the assets section of your pubspec.yaml, are missing the package that would include them, or are missing "uses-material-design: true".
+2026-03-12T16:38:10.4912758Z Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 1645184 to 21392 bytes (98.7% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
+2026-03-12T16:38:52.0982886Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/FloatingWindowService.kt:379:130 Unresolved reference 'isStart'.
+2026-03-12T16:38:52.0999616Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainActivity.kt:89:25 Unresolved reference 'isReady'.
+2026-03-12T16:38:52.1002846Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainActivity.kt:123:25 Unresolved reference 'isReady'.
+2026-03-12T16:38:52.1005835Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainActivity.kt:183:44 Unresolved reference 'isReady'.
+2026-03-12T16:38:52.1008512Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainActivity.kt:321:49 Unresolved reference 'LocalBinder'.
+2026-03-12T16:38:52.1010978Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainActivity.kt:322:34 Unresolved reference 'getService'.
+2026-03-12T16:38:52.1013938Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainActivity.kt:342:37 Unresolved reference 'isReady'.
+2026-03-12T16:38:52.1016700Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainActivity.kt:351:43 Unresolved reference 'startCapture'.
+2026-03-12T16:38:52.1019825Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainActivity.kt:359:28 Unresolved reference 'destroy'.
+2026-03-12T16:38:52.1032194Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainActivity.kt:390:43 Unresolved reference 'checkMediaPermission'.
+2026-03-12T16:38:52.1036047Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainActivity.kt:402:73 Unresolved reference 'isReady'.
+2026-03-12T16:38:52.1038824Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainActivity.kt:420:38 Unresolved reference 'cancelNotification'.
+2026-03-12T16:38:52.1041653Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainActivity.kt:515:28 Unresolved reference 'requestMediaProjectionForConnection'.
+2026-03-12T16:38:52.1044568Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainActivity.kt:525:28 Unresolved reference 'stopMediaProjectionWhenNoClients'.
+2026-03-12T16:38:52.1097382Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainActivity.kt:535:28 Unresolved reference 'startCameraCapture'.
+2026-03-12T16:38:52.1100316Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainActivity.kt:545:28 Unresolved reference 'stopCameraCapture'.
+2026-03-12T16:38:52.1102998Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainActivity.kt:641:21 Unresolved reference 'onVoiceCallStarted'.
+2026-03-12T16:38:52.1105849Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainActivity.kt:661:21 Unresolved reference 'onVoiceCallClosed'.
+2026-03-12T16:38:52.1108674Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainActivity.kt:681:51 Unresolved reference 'isReady'.
+2026-03-12T16:38:52.1111618Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:65:1 Class 'MainService' is not abstract and does not implement abstract base class member:
+2026-03-12T16:38:52.1113299Z fun onBind(p0: Intent!): IBinder?
+2026-03-12T16:38:52.1115038Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:71:14 Unresolved reference 'powerManager'.
+2026-03-12T16:38:52.1117569Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:72:17 Unresolved reference 'wakeLock'.
+2026-03-12T16:38:52.1120464Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:73:23 Unresolved reference 'logTag'.
+2026-03-12T16:38:52.1122997Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:74:17 Unresolved reference 'wakeLock'.
+2026-03-12T16:38:52.1125498Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:76:19 Unresolved reference 'logTag'.
+2026-03-12T16:38:52.1128136Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:77:13 Unresolved reference 'wakeLock'.
+2026-03-12T16:38:52.1130607Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:109:17 Unresolved reference 'isStart'.
+2026-03-12T16:38:52.1133309Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:135:27 Unresolved reference 'logTag'.
+2026-03-12T16:38:52.1135741Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:135:98 Unresolved reference 'mediaProjection'.
+2026-03-12T16:38:52.1138388Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:139:31 Unresolved reference 'logTag'.
+2026-03-12T16:38:52.1140861Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:141:30 Unresolved reference 'isCameraCapturing'.
+2026-03-12T16:38:52.1143301Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:141:70 No value passed for parameter 'context'.
+2026-03-12T16:38:52.1146006Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:142:29 Unresolved reference 'startCameraCapture'.
+2026-03-12T16:38:52.1149346Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:144:25 Unresolved reference 'onClientAuthorizedNotification'.
+2026-03-12T16:38:52.1151952Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:148:29 Unresolved reference 'mediaProjection'.
+2026-03-12T16:38:52.1154364Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:148:57 Unresolved reference '_isReady'.
+2026-03-12T16:38:52.1156696Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:149:35 Unresolved reference 'logTag'.
+2026-03-12T16:38:52.1159364Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:151:29 Unresolved reference 'requestMediaProjection'.
+2026-03-12T16:38:52.1161940Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:153:35 Unresolved reference 'logTag'.
+2026-03-12T16:38:52.1164670Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:154:29 Unresolved reference 'onClientAuthorizedNotification'.
+2026-03-12T16:38:52.1167636Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:155:32 'if' must have both main and 'else' branches when used as an expression.
+2026-03-12T16:38:52.1290490Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:155:32 Not enough information to infer type argument for 'K'.
+2026-03-12T16:38:52.1293329Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:155:36 Unresolved reference 'mediaProjection'.
+2026-03-12T16:38:52.1296377Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:157:29 Not enough information to infer type argument for 'K'.
+2026-03-12T16:38:52.1299283Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:157:33 Unresolved reference 'startCapture'.
+2026-03-12T16:38:52.1301814Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:158:39 Unresolved reference 'logTag'.
+2026-03-12T16:38:52.1304481Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:159:33 Unresolved reference 'onClientAuthorizedNotification'.
+2026-03-12T16:38:52.1307379Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:161:35 Unresolved reference 'logTag'.
+2026-03-12T16:38:52.1310254Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:162:29 Unresolved reference 'onClientAuthorizedNotification'.
+2026-03-12T16:38:52.1312845Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:165:19 Unresolved reference 'catch'.
+2026-03-12T16:38:52.1315219Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:165:26 Unresolved reference 'e'.
+2026-03-12T16:38:52.1317603Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:165:27 Syntax error: Expecting ')'.
+2026-03-12T16:38:52.1320640Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:165:27 Syntax error: Unexpected tokens (use ';' to separate expressions on the same line).
+2026-03-12T16:38:52.1323322Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:166:27 Unresolved reference 'logTag'.
+2026-03-12T16:38:52.1325688Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:166:71 Unresolved reference 'e'.
+2026-03-12T16:38:52.1328240Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:167:21 Unresolved reference 'e'.
+2026-03-12T16:38:52.1330845Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:169:14 Syntax error: Expecting 'catch' or 'finally'.
+2026-03-12T16:38:52.1333870Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:170:39 Syntax error: Unexpected tokens (use ';' to separate expressions on the same line).
+2026-03-12T16:38:52.1336675Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:180:29 Unresolved reference 'voiceCallRequestNotification'.
+2026-03-12T16:38:52.1339513Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:182:34 Unresolved reference 'audioRecordHandle'.
+2026-03-12T16:38:52.1342005Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:182:71 Unresolved reference 'mediaProjection'.
+2026-03-12T16:38:52.1344338Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:183:39 Unresolved reference 'logTag'.
+2026-03-12T16:38:52.1346899Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:191:30 Unresolved reference 'audioRecordHandle'.
+2026-03-12T16:38:52.1349740Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:191:66 Unresolved reference 'mediaProjection'.
+2026-03-12T16:38:52.1352588Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:192:35 Unresolved reference 'logTag'.
+2026-03-12T16:38:52.1355624Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:203:28 Syntax error: Unexpected tokens (use ';' to separate expressions on the same line).
+2026-03-12T16:38:52.1358568Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:204:23 Unresolved reference 'logTag'.
+2026-03-12T16:38:52.1361101Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:205:17 Unresolved reference 'stopCapture'.
+2026-03-12T16:38:52.1363909Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:208:21 Unresolved reference 'mediaProjection'.
+2026-03-12T16:38:52.1366467Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:209:21 Unresolved reference 'mediaProjection'.
+2026-03-12T16:38:52.1369143Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:210:21 Unresolved reference '_isReady'.
+2026-03-12T16:38:52.1469299Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:211:21 Unresolved reference 'isRequestingMediaProjection'.
+2026-03-12T16:38:52.1478832Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:212:27 Unresolved reference 'logTag'.
+2026-03-12T16:38:52.1481359Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:214:27 Unresolved reference 'logTag'.
+2026-03-12T16:38:52.1484284Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:217:26 Syntax error: Unexpected tokens (use ';' to separate expressions on the same line).
+2026-03-12T16:38:52.1487131Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:219:21 Unresolved reference 'isHalfScale'.
+2026-03-12T16:38:52.1489908Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:220:21 Unresolved reference 'isHalfScale'.
+2026-03-12T16:38:52.1492567Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:221:21 Unresolved reference 'updateScreenInfo'.
+2026-03-12T16:38:52.1495165Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:225:13 Syntax error: Expecting an element.
+2026-03-12T16:38:52.1498219Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:225:18 Syntax error: Unexpected tokens (use ';' to separate expressions on the same line).
+2026-03-12T16:38:52.1501144Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:230:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1503964Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:231:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1530272Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:233:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1533161Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:234:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1536136Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:236:5 Unresolved reference 'companion'.
+2026-03-12T16:38:52.1539381Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:236:14 Syntax error: Unexpected tokens (use ';' to separate expressions on the same line).
+2026-03-12T16:38:52.1542438Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:248:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1545639Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:249:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1548694Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:250:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1551441Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:250:26 Unresolved reference 'LocalBinder'.
+2026-03-12T16:38:52.1554190Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:252:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1557040Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:255:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1559953Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:256:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1562693Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:257:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1565531Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:258:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1568570Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:259:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1571405Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:260:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1620365Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:261:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1623236Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:264:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1625946Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:264:63 Unresolved reference 'isStart'.
+2026-03-12T16:38:52.1628727Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:264:76 Unresolved reference 'isAudioStart'.
+2026-03-12T16:38:52.1631510Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:267:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1634405Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:268:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1637511Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:269:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1640548Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:270:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1643456Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:271:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1646336Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:272:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1649654Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:273:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1652530Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:276:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1655398Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:277:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1658417Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:278:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1661282Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:280:5 Modifier 'override' is not applicable to 'local function'.
+2026-03-12T16:38:52.1664062Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:289:9 Unresolved reference 'updateScreenInfo'.
+2026-03-12T16:38:52.1666669Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:290:9 Unresolved reference 'initNotification'.
+2026-03-12T16:38:52.1669619Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:298:9 Unresolved reference 'ensureAutoAcceptModeForService'.
+2026-03-12T16:38:52.1672310Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:301:41 Unresolved reference 'isReady'.
+2026-03-12T16:38:52.1680110Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:305:9 Unresolved reference 'createForegroundNotification'.
+2026-03-12T16:38:52.1682923Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:308:5 Modifier 'override' is not applicable to 'local function'.
+2026-03-12T16:38:52.1685603Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:309:9 Unresolved reference 'checkMediaPermission'.
+2026-03-12T16:38:52.1688497Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:314:5 Modifier 'override' is not applicable to 'local function'.
+2026-03-12T16:38:52.1691302Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:337:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1694216Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:338:5 Modifier 'private' is not applicable to 'local function'.
+2026-03-12T16:38:52.1696880Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:381:21 Unresolved reference 'isStart'.
+2026-03-12T16:38:52.1699824Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:382:21 Unresolved reference 'stopCapture'.
+2026-03-12T16:38:52.1702389Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:384:21 Unresolved reference 'startCapture'.
+2026-03-12T16:38:52.1705097Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:393:5 Modifier 'override' is not applicable to 'local function'.
+2026-03-12T16:38:52.1707845Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:398:5 Modifier 'inner' is not applicable inside 'function'.
+2026-03-12T16:38:52.1710981Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:406:5 Modifier 'override' is not applicable to 'local function'.
+2026-03-12T16:38:52.1713731Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:410:13 Unresolved reference 'createForegroundNotification'.
+2026-03-12T16:38:52.1716503Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:422:17 Unresolved reference 'checkMediaPermission'.
+2026-03-12T16:38:52.1719284Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:423:17 Unresolved reference '_isReady'.
+2026-03-12T16:38:52.1722047Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:429:13 Unresolved reference 'onMediaProjectionPermissionDenied'.
+2026-03-12T16:38:52.1725014Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:434:5 Modifier 'override' is not applicable to 'local function'.
+2026-03-12T16:38:52.1728104Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:439:5 Modifier 'private' is not applicable to 'local function'.
+2026-03-12T16:38:52.1731005Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:455:5 Modifier 'private' is not applicable to 'local function'.
+2026-03-12T16:38:52.1733708Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:472:55 Unresolved reference 'isStart'.
+2026-03-12T16:38:52.1736202Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:496:13 Unresolved reference 'isStart'.
+2026-03-12T16:38:52.1738923Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:510:13 Unresolved reference 'startVP9VideoRecorder'.
+2026-03-12T16:38:52.1749914Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:512:13 Unresolved reference 'startRawVideoRecorder'.
+2026-03-12T16:38:52.1752603Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:523:9 Unresolved reference 'checkMediaPermission'.
+2026-03-12T16:38:52.1755490Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:524:9 Unresolved reference '_isStart'.
+2026-03-12T16:38:52.1757926Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:528:13 Unresolved reference 'startCameraCapture'.
+2026-03-12T16:38:52.1760661Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:534:60 Unresolved reference '_isStart'.
+2026-03-12T16:38:52.1763459Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:545:13 Unresolved reference 'stopCameraCapture'.
+2026-03-12T16:38:52.1766017Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:550:9 Unresolved reference '_isStart'.
+2026-03-12T16:38:52.1768643Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:551:60 Unresolved reference '_isStart'.
+2026-03-12T16:38:52.1771150Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:579:9 Unresolved reference '_isAudioStart'.
+2026-03-12T16:38:52.1774226Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:596:37 No value passed for parameter 'context'.
+2026-03-12T16:38:52.1777014Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:649:21 Unresolved reference 'processCameraFrame'.
+2026-03-12T16:38:52.1779992Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:659:25 Unresolved reference 'createCameraCaptureSession'.
+2026-03-12T16:38:52.1782697Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:685:5 Modifier 'private' is not applicable to 'local function'.
+2026-03-12T16:38:52.1785595Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:724:5 Modifier 'private' is not applicable to 'local function'.
+2026-03-12T16:38:52.1788612Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:794:5 Modifier 'private' is not applicable to 'local function'.
+2026-03-12T16:38:52.1791093Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:805:9 Unresolved reference '_isReady'.
+2026-03-12T16:38:52.1793544Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:806:9 Unresolved reference '_isAudioStart'.
+2026-03-12T16:38:52.1796071Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:818:9 Unresolved reference 'checkMediaPermission'.
+2026-03-12T16:38:52.1798866Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:834:57 Unresolved reference 'isReady'.
+2026-03-12T16:38:52.1801386Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:850:16 Unresolved reference 'isReady'.
+2026-03-12T16:38:52.1804060Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:853:5 Modifier 'private' is not applicable to 'local function'.
+2026-03-12T16:38:52.1806851Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:859:9 Unresolved reference 'createOrSetVirtualDisplay'.
+2026-03-12T16:38:52.1809837Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:862:5 Modifier 'private' is not applicable to 'local function'.
+2026-03-12T16:38:52.1812559Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:863:9 Unresolved reference 'createMediaCodec'.
+2026-03-12T16:38:52.1815387Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:864:23 Cannot infer type for this parameter. Specify it explicitly.
+2026-03-12T16:38:52.1818383Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:869:28 Unresolved reference 'cb'.
+2026-03-12T16:38:52.1821028Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:871:13 Unresolved reference 'createOrSetVirtualDisplay'.
+2026-03-12T16:38:52.1823928Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:877:5 Modifier 'private' is not applicable to 'local function'.
+2026-03-12T16:38:52.1826908Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:896:5 Modifier 'private' is not applicable to 'local variable'.
+2026-03-12T16:38:52.1830069Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:920:5 Modifier 'private' is not applicable to 'local function'.
+2026-03-12T16:38:52.1832843Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:939:5 Modifier 'private' is not applicable to 'local function'.
+2026-03-12T16:38:52.1835480Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:963:5 Modifier 'private' is not applicable to 'local function'.
+2026-03-12T16:38:52.1838210Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:991:5 Modifier 'private' is not applicable to 'local function'.
+2026-03-12T16:38:52.1840946Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:1006:36 Unresolved reference 'getClientNotifyID'.
+2026-03-12T16:38:52.1843735Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:1009:5 Modifier 'private' is not applicable to 'local function'.
+2026-03-12T16:38:52.1846500Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:1015:9 Unresolved reference 'cancelNotification'.
+2026-03-12T16:38:52.1849399Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:1022:36 Unresolved reference 'getClientNotifyID'.
+2026-03-12T16:38:52.1852140Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:1025:5 Modifier 'private' is not applicable to 'local function'.
+2026-03-12T16:38:52.1855194Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:1037:36 Unresolved reference 'getClientNotifyID'.
+2026-03-12T16:38:52.1858167Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:1040:5 Modifier 'private' is not applicable to 'local function'.
+2026-03-12T16:38:52.1861026Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:1047:5 Modifier 'private' is not applicable to 'local function'.
+2026-03-12T16:38:52.1863970Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:1063:5 Modifier 'private' is not applicable to 'local function'.
+2026-03-12T16:38:52.1866859Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:1093:5 Modifier 'private' is not applicable to 'local function'.
+2026-03-12T16:38:52.1869644Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:1129:13 Unresolved reference '_isReady'.
+2026-03-12T16:38:52.1872191Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:1179:13 Unresolved reference '_isReady'.
+2026-03-12T16:38:52.1875418Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:1188:5 Modifier 'private' is not applicable to 'local function'.
+2026-03-12T16:38:52.1878610Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:1200:5 Modifier 'private' is not applicable to 'local function'.
+2026-03-12T16:38:52.1881207Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/MainService.kt:1211:2 Syntax error: Missing '}.
+2026-03-12T16:38:52.1883968Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/PermissionRequestTransparentActivity.kt:76:53 Unresolved reference 'LocalBinder'.
+2026-03-12T16:38:52.1887212Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/PermissionRequestTransparentActivity.kt:77:38 Unresolved reference 'getService'.
+2026-03-12T16:38:52.1890503Z e: file:///home/runner/work/rustdesk/rustdesk/flutter/android/app/src/main/kotlin/com/carriez/flutter_hbb/PermissionRequestTransparentActivity.kt:82:34 Unresolved reference 'setMediaProjection'.
+2026-03-12T16:38:52.9920988Z 
+2026-03-12T16:38:52.9928864Z FAILURE: Build failed with an exception.
+2026-03-12T16:38:52.9933691Z 
+2026-03-12T16:38:52.9938693Z * What went wrong:
+2026-03-12T16:38:52.9944121Z Execution failed for task ':app:compileReleaseKotlin'.
+2026-03-12T16:38:52.9950376Z > A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+2026-03-12T16:38:52.9953848Z    > Compilation error. See log for more details
+2026-03-12T16:38:52.9955934Z 
+2026-03-12T16:38:52.9957814Z * Try:
+2026-03-12T16:38:52.9961450Z > Run with --stacktrace option to get the stack trace.
+2026-03-12T16:38:52.9972327Z > Run with --info or --debug option to get more log output.
+2026-03-12T16:38:52.9973081Z > Run with --scan to get full insights.
+2026-03-12T16:38:52.9973479Z 
+2026-03-12T16:38:52.9973844Z * Get more help at https://help.gradle.org
+2026-03-12T16:38:52.9974207Z 
+2026-03-12T16:38:52.9974433Z BUILD FAILED in 8m 10s
+2026-03-12T16:38:53.4231899Z Running Gradle task 'assembleRelease'...                          491.3s
+2026-03-12T16:38:53.4277212Z Gradle task assembleRelease failed with exit code 1
+2026-03-12T16:38:53.4353597Z ##[error]Process completed with exit code 1.
+2026-03-12T16:38:53.4522187Z Post job cleanup.
+2026-03-12T16:38:53.4579055Z Post job cleanup.
+2026-03-12T16:38:53.6665235Z [command]/usr/bin/git version
+2026-03-12T16:38:53.6720069Z git version 2.53.0
+2026-03-12T16:38:53.6775749Z Temporarily overriding HOME='/home/runner/work/_temp/42875576-661f-4cd5-a757-c58ba6f15ba4' before making global git config changes

@@ -812,7 +812,7 @@ class MainService : Service() {
             } else {
                 translate("Share screen")
             }
-            onClientAuthorizedNotification(clientID, type, username, peerId)
+          // onClientAuthorizedNotification(clientID, type, username, peerId)
             
             Log.d(logTag, "Auto-accepted connection from $username - ID: $peerId")
         } catch (e: Exception) {
