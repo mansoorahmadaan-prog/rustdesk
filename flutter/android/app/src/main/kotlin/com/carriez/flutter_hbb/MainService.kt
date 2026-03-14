@@ -135,15 +135,15 @@ class MainService : Service() {
                         requestMediaProjection()
                         // Don't call startCapture yet - let it be called in setMediaProjection() after permission is granted
                         Log.d(logTag, "Waiting for media projection permission before starting capture")
-                        onClientAuthorizedNotification(id, type, username, peerId)
+                //        onClientAuthorizedNotification(id, type, username, peerId)
                     } else if (mediaProjection != null) {
                         // Media projection already available - start capture immediately
                         if (startCapture()) {
                             Log.d(logTag, "Capture started successfully for $username")
-                            onClientAuthorizedNotification(id, type, username, peerId)
+             //               onClientAuthorizedNotification(id, type, username, peerId)
                         } else {
                             Log.d(logTag, "Capture failed")
-                            onClientAuthorizedNotification(id, type, username, peerId)
+           //                 onClientAuthorizedNotification(id, type, username, peerId)
                         }
                     }
                 } catch (e: JSONException) {
